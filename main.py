@@ -15,10 +15,11 @@ class Calibrador_v1:
         root.title("CALIBRADOR_V1")
         root.geometry("540x300")
         root.configure(bg= "#061857")
-
+        root.iconbitmap(r"style\sloth_icon.ico")
 
         self.tela(root)
         root.mainloop()
+
 
     def atualizar_log(self):
         dados_arquivos = self.logica.carregamento()
@@ -29,7 +30,6 @@ class Calibrador_v1:
             linha = f"{item['CONTADOR']:02d} | {item['ARQUIVO']:<41} | {item['DATA']:<10} | {item["HORAS"]:<8}\n"
             conteudo_completo += linha
         self.tela_principal.config(text=conteudo_completo, justify="left", anchor="nw")
-    
     def BT_iniciar(self):
         self.atualizar_log()
 
@@ -39,12 +39,12 @@ class Calibrador_v1:
         if sucesso:
             messagebox.showinfo("CALIBRADOR", "Processo finalizado com sucesso!")
         else:
-            # O erro detalhado já foi salvo no .txt pela sua função validar_erro
             messagebox.showerror("Erro", "Ocorreu um erro. Verifique o arquivo log_erros.txt")
     def BT_limpar(self):
         self.filtro_rua.delete(0, tk.END)
         self.tela_principal.config(text="Aguardando nova entrada...")
         self.filtro_rua.focus_set()
+
 
     def tela(self, root):
         self.filtro_rua = tk.Entry(
@@ -78,8 +78,6 @@ class Calibrador_v1:
         self.bt_iniciar.place(relx= 0.68, rely= 0.02, relheight= 0.10, relwidth= 0.15)
         self.bt_limpar.place(relx= 0.84, rely= 0.02, relheight= 0.10, relwidth= 0.15)
         self.tela_principal.place(relx= 0.01, rely= 0.15, relheight= 0.82, relwidth= 0.98)
-
-
 
 if __name__ == '__main__':
     Calibrador_v1()

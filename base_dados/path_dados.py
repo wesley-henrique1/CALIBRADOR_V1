@@ -17,14 +17,15 @@ class Path_dados:
     cadastro_8596 = os.path.join(PASTA_DADOS, '8596 - Dados logistico produtos WMS.xlsx')
 
     # Sugestões
-    sugestao_1 = os.path.join(PASTA_DADOS, 'DEP_1.txt')
-    sugestao_2 = os.path.join(PASTA_DADOS, 'DEP_2.txt')
-    sugestao_3 = os.path.join(PASTA_DADOS, 'DEP_3.txt')
-    sugestao_4 = os.path.join(PASTA_DADOS, 'DEP_4.txt')
+    sugestao_1 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_1.txt')
+    sugestao_2 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_2.txt')
+    sugestao_3 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_3.txt')
+    sugestao_4 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_4.txt')
 
     # Movimentações
-    movimentar_1 = os.path.join(PASTA_DADOS, 'MOV_1.txt')
-    movimentar_2 = os.path.join(PASTA_DADOS, 'MOV_2.txt')
-    movimentar_3 = os.path.join(PASTA_DADOS, 'MOV_3.txt')
-    movimentar_4 = os.path.join(PASTA_DADOS, 'MOV_4.txt')
+    movimentar_1 = os.path.join(PASTA_DADOS, '1782 - Movimentação DEP_1.txt')
+    movimentar_2 = os.path.join(PASTA_DADOS, '1782 - Movimentação DEP_2.txt')
+    movimentar_3 = os.path.join(PASTA_DADOS, '1782 - Movimentação DEP_3.txt')
+    movimentar_4 = os.path.join(PASTA_DADOS, '1782 - Movimentação DEP_4.txt')
     retorno = FILE_RETORNO
+   

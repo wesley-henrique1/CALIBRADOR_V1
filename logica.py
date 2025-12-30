@@ -66,8 +66,7 @@ class Auxiliares:
         if not lista:
             return pd.DataFrame()
         df_temp = pd.concat(lista, axis=0, ignore_index=True)
-        return df_temp
-    
+        return df_temp   
 class Logicas(Auxiliares):
     def __init__(self):
         os.system("title CALIBRADOR_V1")
@@ -76,7 +75,6 @@ class Logicas(Auxiliares):
             ,Path_dados.movimentar_1,Path_dados.movimentar_2,Path_dados.movimentar_3,Path_dados.movimentar_4
             ,Path_dados.sugestao_1,Path_dados.sugestao_2,Path_dados.sugestao_3,Path_dados.sugestao_4
         ]
-
         self.LARGURA = 78
 
     def carregamento(self):

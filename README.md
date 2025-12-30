@@ -1,3 +1,7 @@
 # CALIBRADOR_V1
 
-python -m PyInstaller --onefile --name=CALIBRADOR_V1 --icon=style\favicon.ico --paths BASE_DADOS CALIBRAR.py
+pasta unica
+python -m PyInstaller --onefile --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
+
+mutipasta
+python -m PyInstaller --onedir --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
