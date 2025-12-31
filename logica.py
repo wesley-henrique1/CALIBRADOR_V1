@@ -76,6 +76,8 @@ class Logicas(Auxiliares):
             ,Path_dados.sugestao_1,Path_dados.sugestao_2,Path_dados.sugestao_3,Path_dados.sugestao_4
         ]
         self.LARGURA = 78
+        self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
+
 
     def carregamento(self):
         lista_de_logs = []
@@ -112,6 +114,7 @@ class Logicas(Auxiliares):
                 ,'EMBALAGEM'
                 ,'CAPACIDADE'
                 ,'PONTOREPOSICAO'
+                ,'PK_END'
                 ]
             col_acesso =[
                 'CODPROD'
@@ -151,8 +154,8 @@ class Logicas(Auxiliares):
                 ,'MES_3'
                 ,'TIPO'
                 ,'CAP'
-                ,'1_DIA'
-                ,'COM_FATOR'
+                ,'GIRO_DIA'
+                ,'SUGESTAO'
                 ,'VARIAÇÃO'
                 ,'%'
                 ]
@@ -199,7 +202,6 @@ class Logicas(Auxiliares):
                 df_produtos = df_produtos.loc[df_produtos['RUA'].between(1,39)]
 
             df_produtos['OBS2'] = df_produtos['OBS2'].fillna("Ativos")
-            df_produtos["PRODUTO"] = df_produtos['CODPROD'].astype(str)
 
             df_estoque = df_estoque.fillna(0)
             rename = {
@@ -219,13 +221,43 @@ class Logicas(Auxiliares):
             df_calibrado = df_calibrado.merge(df_estoque, left_on='CODPROD', right_on='CODPROD', how='left')
             df_calibrado = df_calibrado.merge(df_acesso, left_on='CODPROD', right_on='CODPROD', how= 'left')
             df_calibrado = df_calibrado.merge(df_movimentar, left_on='CODPROD', right_on='COD', how="left").drop(columns= 'COD')
-
-            df_calibrado['SUG_%'] = round(df_calibrado['COM_FATOR'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
-            df_calibrado['ATUAL_%'] = round(df_calibrado['CAPACIDADE'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
-            df_calibrado['VAL_1_DIA'] = np.where(
-                df_calibrado['PONTOREPOSICAO'] < df_calibrado['1_DIA'], "MENOR", "NORMAL"
-            )
             df_calibrado['CUSTO'] = df_calibrado['CUSTO_ULT_ENTRADA'].round(2)
+
+            df_calibrado['SUG_%'] = round(df_calibrado['SUGESTAO'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
+            df_calibrado['ATUAL_%'] = round(df_calibrado['CAPACIDADE'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
+
+            df_calibrado['ANALISE'] = np.where(
+                df_calibrado['PONTOREPOSICAO'] < df_calibrado['GIRO_DIA']
+                ,"AJUSTAR"
+                ,"NORMAL"
+            )
+            df_calibrado['GIRO_DIA_1'] = np.where(
+                df_calibrado['GIRO_DIA'] >= df_calibrado['CAPACIDADE']
+                ,"AJUSTAR"
+                ,"NORMAL"
+            )
+            df_calibrado['GIRO_DIA_2'] = np.where(
+                df_calibrado['GIRO_DIA_1'] == "NORMAL"
+                ,np.where((
+                    df_calibrado['GIRO_DIA'].astype(float) / df_calibrado['CAPACIDADE'].astype(float)) > 0.5
+                        ,"CAP MENOR"
+                        ,"NORMAL"
+                    )
+                ,"NORMAL"
+            )
+            
+            concat = df_calibrado['RUA'].astype(str) + " - " + df_calibrado['PREDIO'].astype(str)
+            df_calibrado['CONT_AP'] = concat.map(concat.value_counts())
+            df_calibrado['STATUS_PROD'] = np.where(
+                (df_calibrado['CONT_AP'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
+                ,"INT"
+                ,np.where(df_calibrado['CONT_AP'] > 3,
+                          "DIV"
+                          ,"VAL"
+                )
+            )
+
+            col_analises = ['SUG_%', 'ATUAL_%', 'ANALISE','GIRO_DIA_1','GIRO_DIA_2','CONT_AP','STATUS_PROD']
         except Exception as e:
             self.validar_erro(e, "TRATAMENTO")
             self.log_aviso(true_false= False)
@@ -234,8 +266,7 @@ class Logicas(Auxiliares):
 
             df_calibrado = df_calibrado.sort_values(by= ['RUA', 'PREDIO'], ascending= True)
             col_ordenar = [
-                'PRODUTO'
-                ,'CODPROD'
+                'CODPROD'
                 ,'DESCRICAO'
                 ,'OBS2'
                 ,'QTUNITCX'
@@ -253,17 +284,14 @@ class Logicas(Auxiliares):
                 ,'MES_1'
                 ,'MES_2'
                 ,'MES_3'
-                ,'1_DIA'
-                ,'COM_FATOR'
+                ,'GIRO_DIA'
+                ,'SUGESTAO'
                 ,'ACESSO'
                 ,'MOVI'
-                ,'SUG_%'
-                ,'ATUAL_%'
-                ,'VAL_1_DIA'
                 ,'CLASSE'
             ]
-            df_calibrado = df_calibrado[col_ordenar]
-
+            df_calibrado = df_calibrado[col_ordenar + col_analises]
+    
             df_calibrado.to_excel(Path_dados.retorno, index= False, sheet_name= 'Calibração')
 
             return True                
