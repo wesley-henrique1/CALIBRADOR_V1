@@ -12,13 +12,13 @@ PASTA_DADOS = os.path.join(BASE_DIR, "base_dados")
 FILE_RETORNO = os.path.join(BASE_DIR, 'RETORNO.xlsx')
 
 class Path_dados:
-    estoque_286 = os.path.join(PASTA_DADOS, '0286 - Consultar Produtos.xls')
-    acesso_8560 = os.path.join(PASTA_DADOS, '8560 - Relatório acesso.xlsx')
-    cadastro_8596 = os.path.join(PASTA_DADOS, '8596 - Dados logistico produtos WMS.xlsx')
+    estoque_286 = os.path.join(PASTA_DADOS, 'ESTOQUE_CUSTO.xls')
+    acesso_8560 = os.path.join(PASTA_DADOS, 'ACESSO_PROD.xlsx')
+    cadastro_8596 = os.path.join(PASTA_DADOS, 'DADOS_PRODUTOS.xlsx')
 
     # Sugestões
-    sugestao_1 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_1.txt')
-    sugestao_2 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_2.txt')
+    sugestao_1 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_1.txt')
+    sugestao_2 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_1.txt')
     sugestao_3 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_3.txt')
     sugestao_4 = os.path.join(PASTA_DADOS, '1782 - Sugestão DEP_4.txt')
 

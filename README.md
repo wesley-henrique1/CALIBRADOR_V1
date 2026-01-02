@@ -1,9 +1,9 @@
 # CALIBRADOR_V1
 
-pasta unica
+### pasta unica
 python -m PyInstaller --onefile --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
 
-mutipasta
+### mutipasta
 python -m PyInstaller --onedir --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
 
 Documentação do Processo de Consolidação e Análise de Estoque
