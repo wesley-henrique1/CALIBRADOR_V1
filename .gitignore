@@ -8,8 +8,19 @@ venv/
 .venv/
 env/
 
+# PASTA BASE DE ARQUIVOS (Dados Locais)
+base_dados/
+
 # Arquivos de log e temporários
 *.log
 .DS_Store
+*.txt
+*.csv
+*.xlsx
 
-.txt
+# Configurações de IDE
+.vscode/
+.idea/
+
+# Arquivos de ambiente (Senhas e Chaves)
+.env

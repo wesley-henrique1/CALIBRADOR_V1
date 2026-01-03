@@ -71,17 +71,34 @@ class Logicas(Auxiliares):
     def __init__(self):
         os.system("title CALIBRADOR_V1")
         self.listagem_path = [
-            Path_dados.cadastro_8596, Path_dados.acesso_8560, Path_dados.estoque_286
-            ,Path_dados.movimentar_1,Path_dados.movimentar_2,Path_dados.movimentar_3,Path_dados.movimentar_4
-            ,Path_dados.sugestao_1,Path_dados.sugestao_2,Path_dados.sugestao_3,Path_dados.sugestao_4
+            Path_dados.cadastro_8596,   # CADASTRO DOS PRODUTOS
+            Path_dados.acesso_8560,     # ESTOQUE E O CUSTO DOS PRODUTOS
+            Path_dados.estoque_286      # ACESSO DOS PRODUTOS
         ]
+        self.list_sugestao = [
+                Path_dados.sugestao_1   # DEPOSITO 1
+                ,Path_dados.sugestao_2  # DEPOSITO 2
+                ,Path_dados.sugestao_3  # DEPOSITO 3
+                ,Path_dados.sugestao_4  # DEPOSITO 4
+        ]
+        self.list_movimentar = [
+                Path_dados.movimentar_1     # DEPOSITO 1
+                ,Path_dados.movimentar_2    # DEPOSITO 2
+                ,Path_dados.movimentar_3    # DEPOSITO 3
+                ,Path_dados.movimentar_4    # DEPOSITO 4
+        ]
+        print(self.list_movimentar[0:3])
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
 
-    def carregamento(self):
+    def carregamento(self, indice_movi, indece_sug):
         lista_de_logs = []
+        itens_movi = [self.list_movimentar[i] for i in indice_movi]
+        itens_sug = [self.list_sugestao[i] for i in indece_sug]
+
+        lista_completa = self.listagem_path + itens_movi + itens_sug
         try:
-            for contador, path in enumerate(self.listagem_path, 1):
+            for contador, path in enumerate(lista_completa, 1):
                 data_file = os.path.getmtime(path)
                 nome_file = os.path.basename(path)
 
@@ -100,7 +117,7 @@ class Logicas(Auxiliares):
         except Exception as e:
             msg_amigavel = self.validar_erro(e, "CARREGAMENTO")
             return (False, msg_amigavel)
-    def pipeline(self, filtro_rua):
+    def pipeline(self, filtro_rua, indice_sug, indice_movi):
         try: # CARREGAMENTO
             col_produtos =[
                 'CODPROD'
@@ -164,22 +181,18 @@ class Logicas(Auxiliares):
             df_acesso = pd.read_excel(self.listagem_path[1], usecols= col_acesso)
             df_estoque = pd.read_excel(self.listagem_path[2], usecols= col_estoque)
 
-            list_sugestao = [
-                Path_dados.sugestao_1
-                ,Path_dados.sugestao_2
-                ,Path_dados.sugestao_3
-                ,Path_dados.sugestao_4
-            ]
-            df_sugestao = self.director(list_sugestao)
+            if  indice_sug:
+                itens_sug = [self.list_sugestao[i] for i in indice_sug]
+                df_sugestao = self.director(itens_sug)
+            else:
+                df_sugestao = self.director(self.list_sugestao)
             df_sugestao.columns = col_sugestao
             
-            list_movimentar = [
-                Path_dados.movimentar_1
-                ,Path_dados.movimentar_2
-                ,Path_dados.movimentar_3
-                ,Path_dados.movimentar_4
-            ]
-            df_movimentar = self.director(list_movimentar)
+            if indice_movi:
+                itens_movi = [self.list_movimentar[i] for i in indice_movi]
+                df_movimentar = self.director(itens_movi)
+            else:
+                df_movimentar = self.director(self.list_movimentar)
             df_movimentar.columns = col_movimentar
         except Exception as e:
             self.validar_erro(e, "EXTRAIR")
