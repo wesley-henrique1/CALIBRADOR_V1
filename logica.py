@@ -39,13 +39,13 @@ class Auxiliares:
             msg = (
                 f">>> Erro de definição: Variável ou função não definida."
                 f">>> Detalhe: {e}"
-            )    
+            )
         else:
             msg = (f">>> Erro não mapeado: {e}")
-
+        agora = data.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         log_conteudo = (
             f"{'='*self.LARGURA}\n"
-            f"ETAPA: {etapa}\n"
+            f"ETAPA: {etapa} - {agora}\n"
             f"TIPO: {type(e).__name__}\n"
             f"MENSAGEM: {msg}\n"
             f"{'='*self.LARGURA}\n\n"
@@ -78,7 +78,6 @@ class Logicas(Auxiliares):
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
 
-
     def carregamento(self):
         lista_de_logs = []
         try:
@@ -99,7 +98,8 @@ class Logicas(Auxiliares):
                 lista_de_logs.append(dic_log)
             return lista_de_logs
         except Exception as e:
-            self.validar_erro(e, "CARREGAMENTO")
+            msg_amigavel = self.validar_erro(e, "CARREGAMENTO")
+            return (False, msg_amigavel)
     def pipeline(self, filtro_rua):
         try: # CARREGAMENTO
             col_produtos =[
@@ -183,8 +183,7 @@ class Logicas(Auxiliares):
             df_movimentar.columns = col_movimentar
         except Exception as e:
             self.validar_erro(e, "EXTRAIR")
-            self.log_aviso(true_false= False)
-            return
+            return False
 
         try: # TRATAMENTO
             df_sugestao = df_sugestao.drop_duplicates(subset=['COD'], keep='first')
@@ -221,23 +220,25 @@ class Logicas(Auxiliares):
             df_calibrado = df_calibrado.merge(df_estoque, left_on='CODPROD', right_on='CODPROD', how='left')
             df_calibrado = df_calibrado.merge(df_acesso, left_on='CODPROD', right_on='CODPROD', how= 'left')
             df_calibrado = df_calibrado.merge(df_movimentar, left_on='CODPROD', right_on='COD', how="left").drop(columns= 'COD')
+
+            concat = df_calibrado['RUA'].astype(str) + " - " + df_calibrado['PREDIO'].astype(str)
             df_calibrado['CUSTO'] = df_calibrado['CUSTO_ULT_ENTRADA'].round(2)
 
             df_calibrado['SUG_%'] = round(df_calibrado['SUGESTAO'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
             df_calibrado['ATUAL_%'] = round(df_calibrado['CAPACIDADE'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
 
-            df_calibrado['ANALISE'] = np.where(
+            df_calibrado['SIT_REPOS'] = np.where(
                 df_calibrado['PONTOREPOSICAO'] < df_calibrado['GIRO_DIA']
                 ,"AJUSTAR"
                 ,"NORMAL"
             )
-            df_calibrado['GIRO_DIA_1'] = np.where(
+            df_calibrado['CRIT_CAP'] = np.where(
                 df_calibrado['GIRO_DIA'] >= df_calibrado['CAPACIDADE']
                 ,"AJUSTAR"
                 ,"NORMAL"
             )
-            df_calibrado['GIRO_DIA_2'] = np.where(
-                df_calibrado['GIRO_DIA_1'] == "NORMAL"
+            df_calibrado['ALERTA_50'] = np.where(
+                df_calibrado['CRIT_CAP'] == "NORMAL"
                 ,np.where((
                     df_calibrado['GIRO_DIA'].astype(float) / df_calibrado['CAPACIDADE'].astype(float)) > 0.5
                         ,"CAP MENOR"
@@ -245,25 +246,23 @@ class Logicas(Auxiliares):
                     )
                 ,"NORMAL"
             )
-            
-            concat = df_calibrado['RUA'].astype(str) + " - " + df_calibrado['PREDIO'].astype(str)
-            df_calibrado['CONT_AP'] = concat.map(concat.value_counts())
+            df_calibrado['FREQ_PROD'] = concat.map(concat.value_counts())
+
             df_calibrado['STATUS_PROD'] = np.where(
-                (df_calibrado['CONT_AP'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
-                ,"INT"
-                ,np.where(df_calibrado['CONT_AP'] > 3,
-                          "DIV"
-                          ,"VAL"
+                (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
+                ,"INT",
+                np.where(
+                    df_calibrado['FREQ_PROD'] > 3,
+                    "DIV"
+                    ,"VAL"
                 )
             )
-
-            col_analises = ['SUG_%', 'ATUAL_%', 'ANALISE','GIRO_DIA_1','GIRO_DIA_2','CONT_AP','STATUS_PROD']
+            col_analises = ['SUG_%', 'ATUAL_%', 'SIT_REPOS','CRIT_CAP','ALERTA_50','CRIT_CAP','FREQ_PROD']
         except Exception as e:
             self.validar_erro(e, "TRATAMENTO")
-            self.log_aviso(true_false= False)
+            return False
 
         try: # CARGA
-
             df_calibrado = df_calibrado.sort_values(by= ['RUA', 'PREDIO'], ascending= True)
             col_ordenar = [
                 'CODPROD'
@@ -290,11 +289,11 @@ class Logicas(Auxiliares):
                 ,'MOVI'
                 ,'CLASSE'
             ]
-            df_calibrado = df_calibrado[col_ordenar + col_analises]
-    
-            df_calibrado.to_excel(Path_dados.retorno, index= False, sheet_name= 'Calibração')
 
+            df_calibrado = df_calibrado[col_ordenar + col_analises]
+            df_calibrado.to_excel(Path_dados.retorno, index= False, sheet_name= 'Calibração')
             return True                
         except Exception as e:
             self.validar_erro(e, "CARGA")
             return False
+        

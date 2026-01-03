@@ -1,0 +1,15 @@
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Arquivos de log e temporários
+*.log
+.DS_Store
+
+.txt
