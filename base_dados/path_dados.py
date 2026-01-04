@@ -26,3 +26,4 @@ class Path_dados:
     sugestao_3 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_3_1782.txt')
     sugestao_4 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_4_1782.txt')
     retorno = FILE_RETORNO
+

@@ -87,14 +87,17 @@ class Logicas(Auxiliares):
                 ,Path_dados.movimentar_3    # DEPOSITO 3
                 ,Path_dados.movimentar_4    # DEPOSITO 4
         ]
-        print(self.list_movimentar[0:3])
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
 
-    def carregamento(self, indice_movi, indece_sug):
+    def carregamento(self, indice):
         lista_de_logs = []
-        itens_movi = [self.list_movimentar[i] for i in indice_movi]
-        itens_sug = [self.list_sugestao[i] for i in indece_sug]
+        if indice:
+            itens_movi = [self.list_movimentar[i] for i in indice]
+            itens_sug = [self.list_sugestao[i] for i in indice]
+        else:
+            itens_movi = self.list_movimentar
+            itens_sug = self.list_sugestao
 
         lista_completa = self.listagem_path + itens_movi + itens_sug
         try:
@@ -115,9 +118,9 @@ class Logicas(Auxiliares):
                 lista_de_logs.append(dic_log)
             return lista_de_logs
         except Exception as e:
-            msg_amigavel = self.validar_erro(e, "CARREGAMENTO")
-            return (False, msg_amigavel)
-    def pipeline(self, filtro_rua, indice_sug, indice_movi):
+            self.validar_erro(e, "CARREGAMENTO")
+            return False
+    def pipeline(self, filtro_rua, indice):
         try: # CARREGAMENTO
             col_produtos =[
                 'CODPROD'
@@ -181,19 +184,17 @@ class Logicas(Auxiliares):
             df_acesso = pd.read_excel(self.listagem_path[1], usecols= col_acesso)
             df_estoque = pd.read_excel(self.listagem_path[2], usecols= col_estoque)
 
-            if  indice_sug:
-                itens_sug = [self.list_sugestao[i] for i in indice_sug]
+            if  indice:
+                itens_sug = [self.list_sugestao[i] for i in indice]
+                itens_movi = [self.list_movimentar[i] for i in indice]
                 df_sugestao = self.director(itens_sug)
-            else:
-                df_sugestao = self.director(self.list_sugestao)
-            df_sugestao.columns = col_sugestao
-            
-            if indice_movi:
-                itens_movi = [self.list_movimentar[i] for i in indice_movi]
                 df_movimentar = self.director(itens_movi)
             else:
+                df_sugestao = self.director(self.list_sugestao)
                 df_movimentar = self.director(self.list_movimentar)
-            df_movimentar.columns = col_movimentar
+
+            df_sugestao.columns = col_sugestao
+            df_movimentar.columns = col_movimentar  
         except Exception as e:
             self.validar_erro(e, "EXTRAIR")
             return False
@@ -309,4 +310,3 @@ class Logicas(Auxiliares):
         except Exception as e:
             self.validar_erro(e, "CARGA")
             return False
-        

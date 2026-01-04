@@ -1,57 +1,71 @@
-# CALIBRADOR_V1
+# CALIBRADOR_V1 🦥
 
-### pasta unica
-python -m PyInstaller --onefile --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
+Aplicação desktop voltada para a centralização, processamento e análise inteligente de dados logísticos. O sistema consolida fontes heterogêneas (Excel e TXT) para fornecer métricas críticas sobre ocupação e giro de estoque.
 
-### mutipasta
-python -m PyInstaller --onedir --noconsole --name=CALIBRADOR_V1 --icon=style/favicon.ico --paths=. --paths=base_dados main.py
+## 🚀 Como gerar o executável (.exe)
 
-Documentação do Processo de Consolidação e Análise de Estoque
+Para distribuir a aplicação, utilize o **PyInstaller**. Certifique-se de incluir as pastas de recursos.
 
-1. Objetivo
-    O objetivo desta aplicação é centralizar informações de diferentes fontes (.xlsx e .txt) para realizar a análise de ocupação, giro e status de armazenagem dos produtos. A base principal de consolidação é o arquivo 8596 - dados_prod.
+### Opção A: Arquivo Único (Recomendado para distribuição)
+```bash
+python -m PyInstaller --onefile --windowed --name=CALIBRADOR_V1 --icon=style/flesh_perfil.ico --add-data "style;style" --add-data "base_dados;base_dados" main.py
+```
+###  Opção B: Pasta Única (Mais rápido para abrir)
+```bash
+python -m PyInstaller --onedir --windowed --name=CALIBRADOR_V1 --icon=style/flesh_perfil.ico --add-data "style;style" --add-data "base_dados;base_dados" main.py
+```
 
-2. Integração de Dados (ETL)
-    A unificação dos dados é realizada através de um cruzamento (Join) utilizando a chave primária:
+## 📂 Estrutura do Projeto
+```bash
+CALIBRADOR_V1/
+├── main.py            # Interface Gráfica (Tkinter) e gerenciamento de estados
+├── logica.py          # Pipeline de ETL e Processamento (Pandas/Numpy)
+├── base_dados/        # Fontes de dados (.xlsx, .txt) e mapeamento de caminhos
+│   └── path_dados.py  # Configuração de caminhos dinâmicos
+└── style/             # Assets visuais (ícones e imagens de fundo)
+```
 
-    Chave de Ligação: CODPROD (Código do Produto).
+## ⚙️ Regras de Negócio e Métricas
+O sistema realiza o cálculo automático das colunas abaixo para subsidiar a tomada de decisão:
+| Métrica | Cálculo / Lógica | Objetivo |
+| :--- | :--- | :--- |
+| **SUG_%** | `SUGESTAO / QTTOTPAL` | Percentual da sugestão de compra em relação à norma do palete. |
+| **ATUAL_%** | `CAPACIDADE / QTTOTPAL` | Percentual de ocupação física atual em relação à norma técnica. |
+| **SIT_REPOS** | `PONTOREPOSICAO < GIRO_DIA` | Alerta se o estoque de segurança é menor que o consumo diário. |
+| **CRIT_CAP** | `GIRO_DIA >= CAPACIDADE` | Alerta de gargalo: a demanda diária supera a capacidade do endereço. |
+| **ALERTA_50** | `(GIRO_DIA / CAPACIDADE) > 0.5` | Identifica produtos que consomem mais de 50% da face em um único dia. |
+| **FREQ_PROD** | `count(PREDIO)` | Totalizador de endereços/prédios físicos ocupados pelo produto. |
 
-    Fontes: Arquivos variados em formatos Excel e Texto.
 
-3. Regras de Negócio (Colunas Calculadas)
-    Abaixo estão as métricas calculadas para a validação do estoque e capacidade:
+## 🏷️ Classificação de Status (STATUS_PROD)
+Define a estratégia de armazenagem com base na frequência de ocupação e tipo de estrutura:
 
-    SUG_%	
-    SUGESTÃO / NORMA PALETE	
-    Percentual da sugestão em relação à norma do palete.
+* INT (Inteiro):
+    * Condição: Ocupa até 2 prédios (FREQ_PROD <= 2) em estruturas de paletização padrão.
+    * Significado: Produto estocado de forma otimizada.
 
-    ATUAL_%	
-    CAPACIDADE / NORMA PALETE	
-    Percentual de ocupação atual em relação à norma do palete.
+* DIV (Dividido):
+    * Condição: Ocupa mais de 3 prédios (FREQ_PROD > 3).
+    * Significado: Produto muito fragmentado no armazém; alta necessidade de consolidação.
 
-    SIT_REPOS	
-    Se PONTOREPOSICAO < 1_DIA então "MENOR", senão "NORMAL"	
-    Identifica se o ponto de reposição está abaixo do consumo diário.
+* VAL (Validar):
+    * Condição: Casos de exceção ou endereçamentos que fogem à regra padrão.
 
-    CRIT_CAP	
-    Se GIRO DIA >= CAPACIDADE então "ALERTA", senão "NORMAL"	
-    Valida se o giro diário ultrapassa a capacidade física.
+## 🛠️ Tecnologias Utilizadas
+* Python 3.13
 
-    ALERTA_50	   
-    Se GIRO_DIA_1 == "NORMAL" E (GIRO_DIA / CAPACIDADE) > 0.5 então "CAP MENOR", senão "NORMAL"	
-    Refinamento para identificar produtos com capacidade crítica.
+* Pandas & Numpy (Processamento de dados)
 
-    FREQ_PROD	    
-    Contagem de prédios encontrados	    
-    Totalizador de endereços/prédios ocupados pelo produto.
+* Tkinter (Interface Gráfica)
 
-4. Classificação de Status (CLASSE_LOC)
-    Esta lógica define a ocupação física do produto no armazém com base na estrutura e quantidade de produtos por prédio:
+* Pillow (Manipulação de imagens)
 
-    INT (Inteiro): * Condição: CONT_AP > 2 E Estrutura pertence a ('2-INTEIRO(1,90)', '1-INTEIRO (2,55)').
+* Openpyxl & Xlrd (Motores de leitura de Excel)
 
-    Significado: Indica que o prédio está sendo utilizado em sua totalidade por apenas 1 ou 2 produtos.
+---
+## 👤 Desenvolvido por Wesley Oliveira
+Conecte-se comigo ou entre em contato para dúvidas e sugestões:
 
-    DIV (Dividido):
-
-    Condição: CONT_AP > 3.
+* **LinkedIn:** [Wesley Oliveira](https://www.linkedin.com/in/wesley-henrique22)
+* **Instagram:** [@w25_oliveira](https://www.instagram.com/w25_oliveira/)
+* **E-mail:** [wesleyhfo123@gmail.com](mailto:wesleyhfo123@gmail.com)

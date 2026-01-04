@@ -2,11 +2,10 @@ from logica import Logicas
 from tkinter import messagebox 
 import tkinter as tk
 
+
 class Auxiliar:
-    def atualizar_log(self):
-        itens_movi = [0]
-        itens_sug = [0]
-        self.dados_arquivos = self.logica.carregamento(itens_movi, itens_sug)
+    def atualizar_log(self, indice):
+        self.dados_arquivos = self.logica.carregamento(indice= indice)
         conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^41} | {'DATA':^10} | {'HORA':^8}\n"
         conteudo_completo += f"{'-' * 71}\n"
         
@@ -15,8 +14,8 @@ class Auxiliar:
 
         for item in self.dados_arquivos:
             nome_arq = item['ARQUIVO']
-            if len(nome_arq) > 30:
-                nome_arq = nome_arq[:27] + "..."
+            if len(nome_arq) > 41:
+                nome_arq = nome_arq[:39] + "..."
                 
             linha = f"{item['CONTADOR']:02d}  | {nome_arq:<41} | {item['DATA']:<10} | {item['HORAS']:<8}\n"
             conteudo_completo += linha
@@ -28,25 +27,53 @@ class Auxiliar:
             font=("Consolas", 10) 
         )
     def BT_iniciar(self):
-        self.atualizar_log()
+        root_janela = self.retorno_label.winfo_toplevel()
+        self.retorno_label.config(text=" PROCESSANDO DADOS... POR FAVOR, AGUARDE.", fg="#FF640A")
+        root_janela.config(cursor="watch")
+        root_janela.update_idletasks()
+        try:
+            inicio_rua = int(self.ent_rua_inicio.get())
+            fim_rua = int(self.ent_rua_fim.get())
+            
+            list_ruas = list(range(inicio_rua, fim_rua + 1))
+        except ValueError:
+            list_ruas = []
 
-        entrada_user = self.filtro_rua.get()
-        list_ruas = entrada_user.split()
-        sucesso = self.logica.pipeline(list_ruas)
+        try:
+            inicio_dep = int(self.ent_dep_inicio.get())
+            fim_dep = int(self.ent_dep_fim.get())
+
+            list_dep = list(range(inicio_dep-1, fim_dep))
+        except ValueError:
+            list_dep = []
+
+
+        self.atualizar_log(list_dep)
+        sucesso = self.logica.pipeline(filtro_rua= list_ruas, indice= list_dep)
         if sucesso:
             messagebox.showinfo("CALIBRADOR", "Processo finalizado com sucesso!")
         else:
             messagebox.showerror("Erro", "Ocorreu um erro. Verifique o arquivo log_erros.txt")
+        root_janela.config(cursor="")
     def BT_limpar(self):
-        self.filtro_rua.delete(0, tk.END)
-        self.retorno_label.config(text="Aguardando nova entrada...")
-        self.filtro_rua.focus_set()
+        self.ent_dep_inicio.delete(0, tk.END)
+        self.ent_dep_fim.delete(0, tk.END)
+        self.ent_rua_inicio.delete(0, tk.END)
+        self.ent_rua_fim.delete(0, tk.END)
+
+        self.retorno_label.config(
+            text="Aguardando nova entrada..."
+            ,justify= "center"
+            ,anchor= "center"
+            ,font=("Consolas", 16, "bold")
+)
+        self.ent_dep_inicio.focus_set()
     def abrir_documentacao(self):
         # Cria a janela pop-up
         janela_info = tk.Toplevel()
         janela_info.title("Documentação - Regras de Negócio")
         janela_info.geometry("500x400")
-        janela_info.configure(bg=self.primaria)
+        janela_info.configure(bg=self.backgraund)
         try:
             janela_info.iconbitmap(r"style\sloth_icon.ico")
         except:
@@ -83,8 +110,8 @@ class Auxiliar:
         lbl_info = tk.Label(
             janela_info, text=docs, 
             font=("Consolas", 12), 
-            fg=self.terceiria,
-            bg=self.primaria, 
+            fg=self.text_color,
+            bg=self.backgraund, 
             justify="left", 
             padx=25, pady=25
         )
@@ -93,122 +120,187 @@ class Calibrador_v1(Auxiliar):
     def __init__(self):
         self.logica = Logicas()
 
-        self.primaria = "#f5eded"
-        self.segundaria = "#0a0a0a"
-        self.terceiria = "#061857"
+        self.text_color = "#f5eded"
+        self.backgraund = "#420202"
+        self.color_segundaria = "#000000"
 
         root = tk.Tk()
         root.title("CALIBRADOR_V1")
         root.geometry("540x400")
-        root.configure(bg=  self.terceiria)
-        root.iconbitmap(r"style\sloth_icon.ico")
+        root.iconbitmap(r"style\flesh_perfil.ico")
+        root.configure(bg=  self.backgraund)
         root.resizable(False,False)
+
 
         self.componente(root)
         self.botoes_layout()
-        
         root.mainloop()
 
     def componente(self, root):
-        """
-        Mudar a forma de consultas, vou criar dois entry para inicio e fim, depois separar com o loop
-        ADD outras duas entry para filtrar o depositos e seguir a mesma logica
-        """
         self.filtros_frame = tk.LabelFrame(
             root, 
             text=" PAINEL DE FILTROS ", 
-            font=("Consolas", 10, "bold"),
-            fg=self.primaria,          # Cor do texto (corta a borda)
-            bg=self.terceiria,         # Cor de fundo interna
+            font=("Consolas", 11, "bold"),
+            fg=self.text_color,
+            bg=self.backgraund,
             labelanchor="nw",          
-            
-            # Configuração correta para a borda com texto:
-            borderwidth= 3,             # A espessura da linha que o texto corta
-            relief="groove",           # Estilo que permite ver a borda claramente
-            highlightthickness=0       # Removemos o highlight para não sobrepor o texto
+            borderwidth= 3,
+            relief="solid",
+            highlightthickness=0
         )
-        # Labels e Entrys para o intervalo de depósitos
-        self.text_dep_inicio = tk.Label(
-            self.filtros_frame, text= "DEP. INÍCIO:"
-            ,font=("Consolas", 9)
-            ,bg=self.terceiria, fg=self.primaria
+
+        self.quadro_deposito = tk.LabelFrame(
+            self.filtros_frame
+            ,text=" DEPOSITO "
+            ,font=("Consolas", 11, "bold")
+            ,fg=self.text_color
+            ,bg=self.backgraund
+            ,labelanchor="n"
+            ,borderwidth= 3
+            ,relief="solid"
+            ,highlightthickness=0
         )
         self.ent_dep_inicio = tk.Entry(
-            self.filtros_frame, font=("Consolas", 11)
-        )
-        self.text_dep_fim = tk.Label(
-            self.filtros_frame, text="DEP. FIM:"
-            ,font=("Consolas", 9)
-            ,bg=self.terceiria, fg=self.primaria
+            self.quadro_deposito
+            ,font=("Consolas", 11, "bold")
+            ,relief="solid"
+            ,borderwidth=3
+            ,highlightbackground= self.text_color
         )
         self.ent_dep_fim = tk.Entry(
-            self.filtros_frame, font=("Consolas", 11)
+            self.quadro_deposito
+            ,font=("Consolas", 11, "bold")
+            ,relief="solid"
+            ,borderwidth=3
+            ,highlightbackground= self.text_color
         )
-        self.text_rua_inicio = tk.Label(
-            self.filtros_frame, text="RUA INÍCIO:"
-            ,font=("Consolas", 9)
-            ,bg=self.terceiria, fg=self.primaria
+        self.text_dep_fim = tk.Label(
+            self.quadro_deposito
+            ,text="FIM:"
+            ,font=("Consolas", 11, "bold")
+            ,bg=self.backgraund
+            ,fg=self.text_color
+            ,anchor= "center"
+        )
+        self.text_dep_inicio = tk.Label(
+            self.quadro_deposito
+            , text= "INÍCIO:"
+            ,font=("Consolas", 11, "bold")
+            ,bg=self.backgraund
+            ,fg=self.text_color
+            ,anchor= "center"
+        )
+
+        self.quadro_ruas = tk.LabelFrame(
+            self.filtros_frame
+            ,text=" RUAS " 
+            ,font=("Consolas", 11, "bold")
+            ,fg=self.text_color
+            ,bg=self.backgraund
+            ,labelanchor="n"
+            ,borderwidth= 3
+            ,relief="solid"
+            ,highlightthickness=0
         )
         self.ent_rua_inicio = tk.Entry(
-            self.filtros_frame, font=("Consolas", 11)
-        )
-        self.text_rua_fim = tk.Label(
-            self.filtros_frame, text="RUA FIM:"
-            ,font=("Consolas", 9)
-            ,bg=self.terceiria, fg=self.primaria
+            self.quadro_ruas
+            ,font=("Consolas", 11, "bold")
+            ,relief="solid"
+            ,borderwidth=3
+            ,highlightbackground= self.text_color
         )
         self.ent_rua_fim = tk.Entry(
-            self.filtros_frame, font=("Consolas", 11)
+            self.quadro_ruas
+            ,font=("Consolas", 11, "bold")
+            ,relief="solid"
+            ,borderwidth=3
+            ,highlightbackground= self.text_color
+
         )
+        self.text_rua_inicio = tk.Label(
+            self.quadro_ruas
+            ,text="INÍCIO:"
+            ,font=("Consolas", 11, "bold")
+            ,bg=self.backgraund
+            ,fg=self.text_color
+            ,anchor= "center"
+        )
+        self.text_rua_fim = tk.Label(
+            self.quadro_ruas
+            ,text= "FIM:"
+            ,font=("Consolas", 11, "bold")
+            ,fg=self.text_color
+            ,bg=self.backgraund
+            ,anchor= "center"
+        )
+
         self.retorno_label = tk.Label(
-            root, bg= self.primaria, text="Aguardando inicialização..."
-            ,font=("Verdana", 10), fg= self.segundaria
-            ,highlightthickness= 3, highlightbackground=self.segundaria
+            root
+            ,text="Aguardando inicialização..."
+            ,font=("Consolas", 11, "bold")
+            ,relief= "solid"
+            ,borderwidth= 4
+            ,fg= self.text_color
+            ,bg= self.color_segundaria
+            ,highlightbackground=self.text_color
             ,justify= "center", anchor= "center"
             ,padx=10, pady=10
         )
     
-
         #  LOCALIZAÇÃO
-        self.filtros_frame.place(relx= 0.01, rely= 0.01, relheight= 0.30, relwidth= 0.98)
+        self.filtros_frame.place(relx= 0.01, rely= 0.01, relheight= 0.35, relwidth= 0.98)
 
-        self.text_dep_inicio.place(relx=0.01, rely=0.05,relheight=0.22, relwidth=0.20)
-        self.ent_dep_inicio.place(relx=0.01, rely=0.25,relheight=0.22, relwidth=0.20)
+        self.quadro_deposito.place(relx=0.05, rely=0.05, relheight=0.90, relwidth=0.22)
+        self.text_dep_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
+        self.text_dep_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
+        self.ent_dep_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
+        self.ent_dep_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
 
-        self.text_rua_inicio.place(relx=0.01, rely=0.47,relheight=0.22, relwidth=0.20)
-        self.ent_rua_inicio.place(relx=0.01, rely=0.65,relheight=0.22, relwidth=0.20)
-
-        self.text_dep_fim.place(relx=0.25, rely=0.05,relheight=0.22, relwidth=0.20)
-        self.ent_dep_fim.place(relx=0.25, rely=0.25,relheight=0.22, relwidth=0.20)
-
-        self.text_rua_fim.place(relx=0.25, rely=0.47, relheight=0.22, relwidth=0.20)
-        self.ent_rua_fim.place(relx=0.25, rely=0.65, relheight=0.22, relwidth=0.20)
-
+        self.quadro_ruas.place(relx=0.30, rely=0.05, relheight=0.90, relwidth=0.22)
+        self.text_rua_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
+        self.text_rua_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
+        self.ent_rua_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
+        self.ent_rua_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
 
         self.retorno_label.place(relx= 0.01, rely= 0.40, relheight= 0.58, relwidth= 0.98)
     def botoes_layout(self):
         self.bt_iniciar = tk.Button(
-            self.filtros_frame, bg= self.primaria
-            ,cursor="hand2", command= self.BT_iniciar
-            ,text= "INICIAR",fg= self.terceiria 
-            ,highlightthickness= 2, highlightbackground= self.segundaria
+            self.filtros_frame
+            ,text= "INICIAR"
+            ,font=("Consolas", 11, "bold")
+            ,cursor="hand2"
+            ,fg= self.text_color 
+            ,bg= self.color_segundaria
+            ,highlightbackground= self.text_color
+            ,highlightthickness= 3
+            ,command= self.BT_iniciar
         )
         self.bt_limpar = tk.Button(
-            self.filtros_frame, bg= self.primaria
-            ,cursor="hand2", command= self.BT_limpar
-            ,text= "LIMPAR", fg= self.terceiria
-            ,highlightthickness= 2, highlightbackground= self.segundaria
+            self.filtros_frame
+            ,text= "LIMPAR"
+            ,font=("Consolas", 11, "bold")
+            ,cursor="hand2"
+            ,fg= self.text_color
+            ,bg= self.color_segundaria
+            ,highlightbackground= self.text_color
+            ,highlightthickness= 3
+            ,command= self.BT_limpar
         )
         self.bt_documentar = tk.Button(
-            self.filtros_frame, bg= self.primaria
-            ,cursor="hand2", command= self.abrir_documentacao
-            ,text= "INFO", fg= self.terceiria
-            ,highlightthickness= 2, highlightbackground= self.segundaria
+            self.filtros_frame
+            ,text= "INFO"
+            ,font=("Consolas", 11, "bold")
+            ,cursor="hand2"
+            ,fg= self.text_color
+            ,bg= self.color_segundaria
+            ,highlightbackground= self.text_color
+            ,highlightthickness= 3
+            ,command= self.abrir_documentacao
         )
     
-        self.bt_iniciar.place(relx=0.77, rely=0.17, relheight=0.24, relwidth=0.22)
-        self.bt_limpar.place(relx=0.77, rely=0.46, relheight=0.24, relwidth=0.22)
-        self.bt_documentar.place(relx=0.77, rely=0.75, relheight=0.24, relwidth=0.22)
+        self.bt_iniciar.place(relx=0.75, rely=0.09, relheight=0.24, relwidth=0.22)
+        self.bt_limpar.place(relx=0.75, rely=0.39, relheight=0.24, relwidth=0.22)
+        self.bt_documentar.place(relx=0.75, rely=0.68, relheight=0.24, relwidth=0.22)
 
 if __name__ == '__main__':
     Calibrador_v1()

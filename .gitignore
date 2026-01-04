@@ -1,26 +1,21 @@
 # Cache do Python
 __pycache__/
 *.py[cod]
-*$py.class
 
 # Ambientes virtuais
-venv/
 .venv/
-env/
-
-# PASTA BASE DE ARQUIVOS (Dados Locais)
-base_dados/
-
-# Arquivos de log e temporários
-*.log
-.DS_Store
-*.txt
-*.csv
-*.xlsx
+venv/
 
 # Configurações de IDE
 .vscode/
-.idea/
 
-# Arquivos de ambiente (Senhas e Chaves)
-.env
+# Ignorar apenas os arquivos de DADOS dentro da pasta, mas manter a pasta e o script de caminhos
+base_dados/*.xlsx
+base_dados/*.xls
+base_dados/*.txt
+!base_dados/path_dados.py
+!base_dados/__init__.py
+
+# Ignorar o arquivo de saída gerado pelo Pandas
+RETORNO.xlsx
+log_erros.txt
