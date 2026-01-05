@@ -18,11 +18,12 @@ python -m PyInstaller --onedir --windowed --name=CALIBRADOR_V1 --icon=style/fles
 ## 📂 Estrutura do Projeto
 ```bash
 CALIBRADOR_V1/
-├── main.py            # Interface Gráfica (Tkinter) e gerenciamento de estados
-├── logica.py          # Pipeline de ETL e Processamento (Pandas/Numpy)
-├── base_dados/        # Fontes de dados (.xlsx, .txt) e mapeamento de caminhos
-│   └── path_dados.py  # Configuração de caminhos dinâmicos
-└── style/             # Assets visuais (ícones e imagens de fundo)
+├── main.py                 # Interface Gráfica (Tkinter) e gerenciamento de estados
+├── base_dados/             # Fontes de dados (.xlsx, .txt) e mapeamento de caminhos
+├── fuctions/
+│    └── path_dados.py      # Configuração de caminhos dinâmicos
+│    └── logica.py          # Pipeline de ETL e Processamento (Pandas/Numpy)
+└── style/                  # Assets visuais (ícones e imagens de fundo)
 ```
 
 ## ⚙️ Regras de Negócio e Métricas
@@ -33,7 +34,7 @@ O sistema realiza o cálculo automático das colunas abaixo para subsidiar a tom
 | **ATUAL_%** | `CAPACIDADE / QTTOTPAL` | Percentual de ocupação física atual em relação à norma técnica. |
 | **SIT_REPOS** | `PONTOREPOSICAO < GIRO_DIA` | Alerta se o estoque de segurança é menor que o consumo diário. |
 | **CRIT_CAP** | `GIRO_DIA >= CAPACIDADE` | Alerta de gargalo: a demanda diária supera a capacidade do endereço. |
-| **ALERTA_50** | `(GIRO_DIA / CAPACIDADE) > 0.5` | Identifica produtos que consomem mais de 50% da face em um único dia. |
+| **ALERTA_50** | `(GIRO_DIA / CAPACIDADE) > 0.5` | Identifica produtos que consomem mais de 50% da ocupação em um único dia. |
 | **FREQ_PROD** | `count(PREDIO)` | Totalizador de endereços/prédios físicos ocupados pelo produto. |
 
 

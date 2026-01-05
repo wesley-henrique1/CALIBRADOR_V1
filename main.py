@@ -1,4 +1,4 @@
-from logica import Logicas
+from fuctions.logica import Logicas
 from tkinter import messagebox 
 import tkinter as tk
 

@@ -13,9 +13,9 @@ venv/
 base_dados/*.xlsx
 base_dados/*.xls
 base_dados/*.txt
-!base_dados/path_dados.py
 !base_dados/__init__.py
 
 # Ignorar o arquivo de saída gerado pelo Pandas
 RETORNO.xlsx
+KPI.xlsx
 log_erros.txt

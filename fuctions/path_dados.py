@@ -4,9 +4,8 @@ import sys
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
-    ARQUIVO_ATUAL = os.path.abspath(__file__)
-    PASTA_DO_SCRIPT = os.path.dirname(ARQUIVO_ATUAL)
-    BASE_DIR = os.path.dirname(PASTA_DO_SCRIPT)
+    PASTA_FUNCTIONS = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(PASTA_FUNCTIONS)
 
 PASTA_DADOS = os.path.join(BASE_DIR, "base_dados")
 FILE_RETORNO = os.path.join(BASE_DIR, 'RETORNO.xlsx')
@@ -26,4 +25,5 @@ class Path_dados:
     sugestao_3 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_3_1782.txt')
     sugestao_4 = os.path.join(PASTA_DADOS, 'SUGESTÃO_DEP_4_1782.txt')
     retorno = FILE_RETORNO
+    
 

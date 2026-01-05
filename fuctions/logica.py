@@ -3,7 +3,7 @@ import sys
 diretorio_atual = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, diretorio_atual)
 
-from base_dados.path_dados import *
+from path_dados import *
 import datetime as data
 import pandas as pd
 import numpy as np
@@ -255,10 +255,10 @@ class Logicas(Auxiliares):
                 df_calibrado['CRIT_CAP'] == "NORMAL"
                 ,np.where((
                     df_calibrado['GIRO_DIA'].astype(float) / df_calibrado['CAPACIDADE'].astype(float)) > 0.5
-                        ,"CAP MENOR"
+                        ,"AJUSTAR"
                         ,"NORMAL"
                     )
-                ,"NORMAL"
+                ,"NORMAL" 
             )
             df_calibrado['FREQ_PROD'] = concat.map(concat.value_counts())
 
@@ -271,7 +271,14 @@ class Logicas(Auxiliares):
                     ,"VAL"
                 )
             )
-            col_analises = ['SUG_%', 'ATUAL_%', 'SIT_REPOS','CRIT_CAP','ALERTA_50','CRIT_CAP','FREQ_PROD']
+            df_calibrado['STATUS_FINAL'] = np.where(
+                (df_calibrado['CRIT_CAP'] == "NORMAL")
+                & (df_calibrado['SIT_REPOS'] == "NORMAL")
+                & (df_calibrado['ALERTA_50'] == "NORMAL")
+                ,"NORMAL"
+                ,"DIV"
+            )
+            col_analises = ['SUG_%', 'ATUAL_%', 'SIT_REPOS','ALERTA_50','CRIT_CAP','FREQ_PROD','STATUS_PROD','STATUS_FINAL']
         except Exception as e:
             self.validar_erro(e, "TRATAMENTO")
             return False
