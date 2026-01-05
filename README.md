@@ -12,8 +12,7 @@ python -m PyInstaller --onefile --windowed --name=CALIBRADOR_V1 --icon=style/fle
 ```
 ###  Opção B: Pasta Única (Mais rápido para abrir)
 ```bash
-python -m PyInstaller --onedir --windowed --name=CALIBRADOR_V1 --icon=style/flesh_perfil.ico --add-data "style;style" --add-data "base_dados;base_dados" main.py
-```
+PyInstaller --onedir --windowed --name=CALIBRADOR_V1 --icon=style/flesh_perfil.ico --add-data "style;style" --add-data "base_dados;base_dados" --add-data "fuctions;fuctions" main.py```
 
 ## 📂 Estrutura do Projeto
 ```bash

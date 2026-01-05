@@ -13,6 +13,7 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 
 class Auxiliares:
     def validar_erro(self, e, etapa):
+        LARGURA = 78
         if isinstance(e, PermissionError):
             msg = (
                 f">>> O arquivo de destino está aberto ou você não tem permissão."
@@ -44,11 +45,11 @@ class Auxiliares:
             msg = (f">>> Erro não mapeado: {e}")
         agora = data.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         log_conteudo = (
-            f"{'='*self.LARGURA}\n"
+            f"{'='* LARGURA}\n"
             f"ETAPA: {etapa} - {agora}\n"
             f"TIPO: {type(e).__name__}\n"
             f"MENSAGEM: {msg}\n"
-            f"{'='*self.LARGURA}\n\n"
+            f"{'='* LARGURA}\n\n"
         )
         try:
             with open("log_erros.txt", "a", encoding="utf-8") as erros_log:

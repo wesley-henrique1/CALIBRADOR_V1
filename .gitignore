@@ -8,12 +8,14 @@ venv/
 
 # Configurações de IDE
 .vscode/
+build/
+dist/
+CALIBRADOR_V1.spec
 
 # Ignorar apenas os arquivos de DADOS dentro da pasta, mas manter a pasta e o script de caminhos
 base_dados/*.xlsx
 base_dados/*.xls
 base_dados/*.txt
-!base_dados/__init__.py
 
 # Ignorar o arquivo de saída gerado pelo Pandas
 RETORNO.xlsx

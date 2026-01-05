@@ -1,4 +1,5 @@
 from fuctions.logica import Logicas
+from fuctions.path_dados import Path_dados
 from tkinter import messagebox 
 import tkinter as tk
 
@@ -127,13 +128,14 @@ class Calibrador_v1(Auxiliar):
         root = tk.Tk()
         root.title("CALIBRADOR_V1")
         root.geometry("540x400")
-        root.iconbitmap(r"style\flesh_perfil.ico")
+        root.iconbitmap(Path_dados.icone)
         root.configure(bg=  self.backgraund)
         root.resizable(False,False)
 
 
         self.componente(root)
         self.botoes_layout()
+        self.localizador()
         root.mainloop()
 
     def componente(self, root):
@@ -246,23 +248,6 @@ class Calibrador_v1(Auxiliar):
             ,justify= "center", anchor= "center"
             ,padx=10, pady=10
         )
-    
-        #  LOCALIZAÇÃO
-        self.filtros_frame.place(relx= 0.01, rely= 0.01, relheight= 0.35, relwidth= 0.98)
-
-        self.quadro_deposito.place(relx=0.05, rely=0.05, relheight=0.90, relwidth=0.22)
-        self.text_dep_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
-        self.text_dep_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
-        self.ent_dep_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
-        self.ent_dep_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
-
-        self.quadro_ruas.place(relx=0.30, rely=0.05, relheight=0.90, relwidth=0.22)
-        self.text_rua_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
-        self.text_rua_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
-        self.ent_rua_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
-        self.ent_rua_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
-
-        self.retorno_label.place(relx= 0.01, rely= 0.40, relheight= 0.58, relwidth= 0.98)
     def botoes_layout(self):
         self.bt_iniciar = tk.Button(
             self.filtros_frame
@@ -297,7 +282,23 @@ class Calibrador_v1(Auxiliar):
             ,highlightthickness= 3
             ,command= self.abrir_documentacao
         )
-    
+    def localizador(self):
+        self.filtros_frame.place(relx= 0.01, rely= 0.01, relheight= 0.35, relwidth= 0.98)
+
+        self.quadro_deposito.place(relx=0.05, rely=0.05, relheight=0.90, relwidth=0.22)
+        self.text_dep_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
+        self.text_dep_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
+        self.ent_dep_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
+        self.ent_dep_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
+
+        self.quadro_ruas.place(relx=0.30, rely=0.05, relheight=0.90, relwidth=0.22)
+        self.text_rua_inicio.place(relx=0.05, rely=0.01, relheight=0.30, relwidth=0.50)
+        self.text_rua_fim.place(relx=0.05, rely=0.50, relheight=0.30, relwidth=0.50)
+        self.ent_rua_inicio.place(relx=0.60, rely=0.01,relheight=0.30, relwidth=0.30)
+        self.ent_rua_fim.place(relx=0.60, rely=0.50,relheight=0.30, relwidth=0.30)
+
+        self.retorno_label.place(relx= 0.01, rely= 0.40, relheight= 0.58, relwidth= 0.98)
+
         self.bt_iniciar.place(relx=0.75, rely=0.09, relheight=0.24, relwidth=0.22)
         self.bt_limpar.place(relx=0.75, rely=0.39, relheight=0.24, relwidth=0.22)
         self.bt_documentar.place(relx=0.75, rely=0.68, relheight=0.24, relwidth=0.22)
