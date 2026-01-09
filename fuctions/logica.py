@@ -72,21 +72,22 @@ class Logicas(Auxiliares):
     def __init__(self):
         os.system("title CALIBRADOR_V1")
         self.listagem_path = [
-            Path_dados.cadastro_8596,   # CADASTRO DOS PRODUTOS
-            Path_dados.acesso_8560,     # ESTOQUE E O CUSTO DOS PRODUTOS
-            Path_dados.estoque_286      # ACESSO DOS PRODUTOS
+            Path_dados.cadastro_8596    # CADASTRO DOS PRODUTOS
+            ,Path_dados.acesso_8560     # ESTOQUE E O CUSTO DOS PRODUTOS
+            ,Path_dados.estoque_286     # ACESSO DOS PRODUTOS
+            ,Path_dados.baixa_8628      # BAIXA DOS PRODUTOS
         ]
         self.list_sugestao = [
-                Path_dados.sugestao_1   # DEPOSITO 1
-                ,Path_dados.sugestao_2  # DEPOSITO 2
-                ,Path_dados.sugestao_3  # DEPOSITO 3
-                ,Path_dados.sugestao_4  # DEPOSITO 4
+            Path_dados.sugestao_1   # DEPOSITO 1
+            ,Path_dados.sugestao_2  # DEPOSITO 2
+            ,Path_dados.sugestao_3  # DEPOSITO 3
+            ,Path_dados.sugestao_4  # DEPOSITO 4
         ]
         self.list_movimentar = [
-                Path_dados.movimentar_1     # DEPOSITO 1
-                ,Path_dados.movimentar_2    # DEPOSITO 2
-                ,Path_dados.movimentar_3    # DEPOSITO 3
-                ,Path_dados.movimentar_4    # DEPOSITO 4
+            Path_dados.movimentar_1     # DEPOSITO 1
+            ,Path_dados.movimentar_2    # DEPOSITO 2
+            ,Path_dados.movimentar_3    # DEPOSITO 3
+            ,Path_dados.movimentar_4    # DEPOSITO 4
         ]
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
@@ -103,20 +104,28 @@ class Logicas(Auxiliares):
         lista_completa = self.listagem_path + itens_movi + itens_sug
         try:
             for contador, path in enumerate(lista_completa, 1):
-                data_file = os.path.getmtime(path)
-                nome_file = os.path.basename(path)
+                if os.path.exists(path):
+                    data_file = os.path.getmtime(path)
+                    nome_file = os.path.basename(path)
 
-                data_modificacao = data.datetime.fromtimestamp(data_file)
-                data_formatada = data_modificacao.strftime('%d/%m/%Y')
-                horas_formatada = data_modificacao.strftime('%H:%M:%S')
+                    data_modificacao = data.datetime.fromtimestamp(data_file)
+                    data_formatada = data_modificacao.strftime('%d/%m/%Y')
+                    horas_formatada = data_modificacao.strftime('%H:%M:%S')
 
-                dic_log = {
-                    "CONTADOR" : contador
-                    ,"ARQUIVO" : nome_file
-                    ,"DATA" : data_formatada
-                    ,"HORAS" : horas_formatada
-                }
-                lista_de_logs.append(dic_log)
+                    dic_log = {
+                        "CONTADOR" : contador
+                        ,"ARQUIVO" : nome_file
+                        ,"DATA" : data_formatada
+                        ,"HORAS" : horas_formatada
+                    }
+                    lista_de_logs.append(dic_log)
+                else:
+                    lista_de_logs.append({
+                        "CONTADOR": contador,
+                        "ARQUIVO": f"ERRO: {os.path.basename(path)} (Não encontrado)",
+                        "DATA": "--/--/----",
+                        "HORAS": "--:--:--"
+                    })
             return lista_de_logs
         except Exception as e:
             self.validar_erro(e, "CARREGAMENTO")
@@ -180,10 +189,21 @@ class Logicas(Auxiliares):
                 ,'VARIAÇÃO'
                 ,'%'
                 ]
-
+            col_baixa = [
+                'CODPROD'
+                ,'NIVEL'    
+                ,'NIVEL_1'
+                ,'CODROTINA'
+                ,'Tipo O.S.'
+            ]
             df_produtos = pd.read_excel(self.listagem_path[0], usecols= col_produtos)
             df_acesso = pd.read_excel(self.listagem_path[1], usecols= col_acesso)
             df_estoque = pd.read_excel(self.listagem_path[2], usecols= col_estoque)
+            df_baixa = pd.read_excel(
+                self.listagem_path[3]
+                ,usecols= col_baixa
+                ,dtype= {'NIVEL': 'Int64', 'NIVEL_1': 'Int64', 'CODROTINA': 'Int64'}
+            )
 
             if  indice:
                 itens_sug = [self.list_sugestao[i] for i in indice]
@@ -225,16 +245,57 @@ class Logicas(Auxiliares):
                 ,"Qt.Avaria" : "AVARIA"
                 ,"Custo ult. ent." : "CUSTO_ULT_ENTRADA"
             }
-
             df_estoque = df_estoque.rename(columns=rename)
+
             df_acesso = df_acesso.groupby('CODPROD').agg(
             ACESSO = ("QTOS", "sum")
             ).reset_index()
             
-            df_calibrado = df_produtos.merge(df_sugestao, left_on= 'CODPROD', right_on= 'COD', how= 'left').drop(columns= 'COD')
-            df_calibrado = df_calibrado.merge(df_estoque, left_on='CODPROD', right_on='CODPROD', how='left')
-            df_calibrado = df_calibrado.merge(df_acesso, left_on='CODPROD', right_on='CODPROD', how= 'left')
-            df_calibrado = df_calibrado.merge(df_movimentar, left_on='CODPROD', right_on='COD', how="left").drop(columns= 'COD')
+            df_baixa = df_baixa.loc[
+                ((df_baixa['CODROTINA'].isin([1709, 1723])))
+                & (df_baixa['NIVEL'].between(2,8))
+                & (df_baixa['NIVEL_1'] == 1)
+                & (df_baixa['Tipo O.S.'] == "58 - Transferencia de Para Vertical")
+            ]
+            baixa_grupado = df_baixa.groupby('CODPROD').agg(
+                BAIXA = ('CODPROD', 'size')
+            ).reset_index().fillna(0)
+
+            df_calibrado = df_produtos.merge(
+                df_sugestao
+                ,left_on= 'CODPROD'
+                ,right_on= 'COD'
+                ,how= 'left'
+            ).drop(columns= 'COD')
+            df_calibrado = df_calibrado.merge(
+                df_movimentar
+                ,left_on='CODPROD'
+                ,right_on='COD'
+                ,how="left"
+            ).drop(columns= 'COD')
+            df_calibrado = df_calibrado.merge(
+                df_estoque
+                ,on='CODPROD'
+                ,how='left'
+            )
+            df_calibrado = df_calibrado.merge(
+                df_acesso
+                ,on='CODPROD'
+                ,how= 'left'
+            )
+            df_calibrado = df_calibrado.merge(
+                baixa_grupado
+                ,on='CODPROD'
+                ,how= 'left'
+            )
+            df_calibrado = df_calibrado.fillna({
+                'MOVI': 0, 
+                'BAIXA': 0,
+                'Estoque': 0
+            }).astype({
+                'MOVI': int, 
+                'BAIXA': int
+            })
 
             concat = df_calibrado['RUA'].astype(str) + " - " + df_calibrado['PREDIO'].astype(str)
             df_calibrado['CUSTO'] = df_calibrado['CUSTO_ULT_ENTRADA'].round(2)
@@ -279,6 +340,16 @@ class Logicas(Auxiliares):
                 ,"NORMAL"
                 ,"DIV"
             )
+            
+            df_calibrado['EST_PLT'] = round(
+                (df_calibrado['Estoque'].replace(0, np.nan) / df_calibrado['QTTOTPAL'].replace(0, np.nan))
+                ,1
+            ).fillna(0)
+            df_calibrado['EST_CX'] = round(
+               (df_calibrado['Estoque'].replace(0, np.nan) / df_calibrado['QTUNITCX'].replace(0, np.nan))
+                ,1
+            ).fillna(0)
+            
             col_analises = ['SUG_%', 'ATUAL_%', 'SIT_REPOS','ALERTA_50','CRIT_CAP','FREQ_PROD','STATUS_PROD','STATUS_FINAL']
         except Exception as e:
             self.validar_erro(e, "TRATAMENTO")
@@ -297,7 +368,10 @@ class Logicas(Auxiliares):
                 ,'APTO'
                 ,'CAPACIDADE'
                 ,'QTTOTPAL'
+                ,'BAIXA'
                 ,'Estoque'
+                ,'EST_PLT'
+                ,'EST_CX'
                 ,'PEDIDO_COMP'
                 ,'BLOQUEADO'
                 ,'AVARIA'

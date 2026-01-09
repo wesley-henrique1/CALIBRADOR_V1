@@ -20,6 +20,7 @@ class Path_dados:
     cadastro_8596 = os.path.join(PASTA_DADOS, 'DADOS_PRODUTOS_8596.xlsx')
     acesso_8560 = os.path.join(PASTA_DADOS, 'ACESSO_PROD_8560.xlsx')
     estoque_286 = os.path.join(PASTA_DADOS, 'ESTOQUE_CUSTO_286.xls')
+    baixa_8628 = os.path.join(PASTA_DADOS, 'BAIXA_8628.xlsx')
     # Movimentações
     movimentar_1 = os.path.join(PASTA_DADOS, 'MOVIMENTAÇÃO_DEP_1_1782.txt')
     movimentar_2 = os.path.join(PASTA_DADOS, 'MOVIMENTAÇÃO_DEP_2_1782.txt')

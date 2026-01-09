@@ -6,10 +6,14 @@ import tkinter as tk
 
 class Auxiliar:
     def atualizar_log(self, indice):
+    
         self.dados_arquivos = self.logica.carregamento(indice= indice)
         conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^41} | {'DATA':^10} | {'HORA':^8}\n"
-        conteudo_completo += f"{'-' * 71}\n"
-        
+        conteudo_completo += f"{'-' * 71}\n"        
+        if isinstance(self.dados_arquivos, bool) or self.dados_arquivos is None:
+            self.retorno_label.config(text="Erro: Arquivos não carregados.", fg="red")
+            return # Interrompe a função aqui para não chegar no 'for'
+    
         if self.dados_arquivos is None:
             return 
 
@@ -121,10 +125,10 @@ class Calibrador_v1(Auxiliar):
     def __init__(self):
         self.logica = Logicas()
 
-        self.text_color = "#f5eded"
-        self.backgraund = "#420202"
-        self.color_segundaria = "#000000"
-
+        self.text_color = "#000000"
+        self.backgraund = "#87CEFA" # "#DDA0DD"
+        self.color_segundaria = "#F0FFFF" # "#000000""
+        self.borda_color = "#000000" # "#000000"
         root = tk.Tk()
         root.title("CALIBRADOR_V1")
         root.geometry("540x400")
@@ -140,15 +144,17 @@ class Calibrador_v1(Auxiliar):
 
     def componente(self, root):
         self.filtros_frame = tk.LabelFrame(
-            root, 
-            text=" PAINEL DE FILTROS ", 
-            font=("Consolas", 11, "bold"),
-            fg=self.text_color,
-            bg=self.backgraund,
-            labelanchor="nw",          
-            borderwidth= 3,
-            relief="solid",
-            highlightthickness=0
+            root
+            ,text=" PAINEL DE FILTROS "
+            ,font=("Consolas", 11, "bold")
+            ,fg=self.text_color
+            ,bg=self.backgraund
+            ,labelanchor="nw"
+            ,borderwidth=0
+            ,relief="flat"
+            ,highlightthickness=3
+            ,highlightbackground=self.borda_color
+            ,highlightcolor=self.borda_color
         )
 
         self.quadro_deposito = tk.LabelFrame(
@@ -240,13 +246,15 @@ class Calibrador_v1(Auxiliar):
             root
             ,text="Aguardando inicialização..."
             ,font=("Consolas", 11, "bold")
-            ,relief= "solid"
-            ,borderwidth= 4
-            ,fg= self.text_color
-            ,bg= self.color_segundaria
+            ,borderwidth=0
+            ,highlightthickness=3
             ,highlightbackground=self.text_color
-            ,justify= "center", anchor= "center"
-            ,padx=10, pady=10
+            ,fg=self.text_color
+            ,bg=self.color_segundaria
+            ,justify="center"
+            ,anchor="center"
+            ,padx=10
+            ,pady=10
         )
     def botoes_layout(self):
         self.bt_iniciar = tk.Button(
