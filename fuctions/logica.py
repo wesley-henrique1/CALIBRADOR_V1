@@ -341,12 +341,12 @@ class Logicas(Auxiliares):
                 ,"DIV"
             )
             
-            df_calibrado['EST_PLT'] = round(
-                (df_calibrado['Estoque'].replace(0, np.nan) / df_calibrado['QTTOTPAL'].replace(0, np.nan))
-                ,1
-            ).fillna(0)
             df_calibrado['EST_CX'] = round(
                (df_calibrado['Estoque'].replace(0, np.nan) / df_calibrado['QTUNITCX'].replace(0, np.nan))
+                ,1
+            ).fillna(0)
+            df_calibrado['EST_PLT'] = round(
+                (df_calibrado['EST_CX'].replace(0, np.nan) / df_calibrado['QTTOTPAL'].replace(0, np.nan))
                 ,1
             ).fillna(0)
             

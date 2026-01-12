@@ -18,6 +18,5 @@ base_dados/*.xls
 base_dados/*.txt
 
 # Ignorar o arquivo de saída gerado pelo Pandas
-RETORNO.xlsx
-KPI.xlsx
-log_erros.txt
+*.xls*
+*.txt
