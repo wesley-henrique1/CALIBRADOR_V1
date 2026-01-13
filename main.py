@@ -173,14 +173,14 @@ class Calibrador_v1(Auxiliar):
         )
         self.ent_dep_inicio = tk.Entry(
             self.quadro_deposito
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,relief="solid"
             ,borderwidth=3
             ,highlightbackground= self.text_color
         )
         self.ent_dep_fim = tk.Entry(
             self.quadro_deposito
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,relief="solid"
             ,borderwidth=3
             ,highlightbackground= self.text_color
@@ -188,7 +188,7 @@ class Calibrador_v1(Auxiliar):
         self.text_dep_fim = tk.Label(
             self.quadro_deposito
             ,text="FIM:"
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,bg=self.backgraund
             ,fg=self.text_color
             ,anchor= "center"
@@ -196,7 +196,7 @@ class Calibrador_v1(Auxiliar):
         self.text_dep_inicio = tk.Label(
             self.quadro_deposito
             , text= "INÍCIO:"
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,bg=self.backgraund
             ,fg=self.text_color
             ,anchor= "center"
@@ -215,14 +215,14 @@ class Calibrador_v1(Auxiliar):
         )
         self.ent_rua_inicio = tk.Entry(
             self.quadro_ruas
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,relief="solid"
             ,borderwidth=3
             ,highlightbackground= self.text_color
         )
         self.ent_rua_fim = tk.Entry(
             self.quadro_ruas
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,relief="solid"
             ,borderwidth=3
             ,highlightbackground= self.text_color
@@ -231,7 +231,7 @@ class Calibrador_v1(Auxiliar):
         self.text_rua_inicio = tk.Label(
             self.quadro_ruas
             ,text="INÍCIO:"
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,bg=self.backgraund
             ,fg=self.text_color
             ,anchor= "center"
@@ -239,7 +239,7 @@ class Calibrador_v1(Auxiliar):
         self.text_rua_fim = tk.Label(
             self.quadro_ruas
             ,text= "FIM:"
-            ,font=("Consolas", 11, "bold")
+            ,font=("Consolas", 10, "bold")
             ,fg=self.text_color
             ,bg=self.backgraund
             ,anchor= "center"
@@ -261,27 +261,36 @@ class Calibrador_v1(Auxiliar):
         )
         
         self.quadro_sugestao = tk.LabelFrame(
-            root
+            self.filtros_frame
+            ,text=" DATA " 
             ,font=("Consolas", 11, "bold")
             ,fg=self.text_color
             ,bg=self.backgraund
             ,labelanchor="n"
-            ,borderwidth= 3
             ,relief="solid"
+            ,borderwidth= 3
             ,highlightthickness=0
-
         )
-        texto_datas = (
-            f"90 DIAS: {self.data_90.strftime('%d/%m/%Y')} até {self.data_atual.strftime('%d/%m/%Y')} | "
-            f"30 DIAS: {self.data_30.strftime('%d/%m/%Y')} até {self.data_atual.strftime('%d/%m/%Y')}"
+        self.text_30 = tk.Label(
+            self.quadro_sugestao,
+            text=f"30 Dias >> {self.data_30.strftime('%d/%m/%Y')}",
+            font=("Consolas", 10, "bold"),
+            fg=self.text_color,
+            bg=self.backgraund,
+            anchor="center",
+            borderwidth=2,
+            relief="groove"  # 'groove' dá uma bordinha discreta e profissional
         )
-        self.lb_info_datas = tk.Label(
-            self.quadro_sugestao
-            ,text=texto_datas
-            ,font=("Consolas", 10, "bold")
-            ,bg=self.backgraund, fg=self.text_color
+        self.text_90 = tk.Label(
+            self.quadro_sugestao,
+            text=f"90 Dias >> {self.data_90.strftime('%d/%m/%Y')}", # Padronizei o texto aqui também
+            font=("Consolas", 10, "bold"),
+            fg=self.text_color,
+            bg=self.backgraund,
+            anchor="center",
+            borderwidth=2,
+            relief="groove"
         )
-        # self.lb_info_datas.pack(pady=5)
     def botoes_layout(self):
         self.bt_iniciar = tk.Button(
             self.filtros_frame
@@ -318,42 +327,34 @@ class Calibrador_v1(Auxiliar):
         )      
     def localizador(self):
         # Painel de Filtros (Topo)
-        self.filtros_frame.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.35)
-
-        # Sugestão (Divisor central) - Ajustei a altura para 0.05 para economizar espaço
-        self.quadro_sugestao.place(relx=0.01, rely=0.37, relwidth=0.98, relheight=0.05)
-        self.lb_info_datas.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.98)
-
-        # Retorno (Base) - Ajustei o relheight para 0.56 para caber exatamente na tela (0.44 + 0.56 = 1.0)
+        self.filtros_frame.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.42)
         self.retorno_label.place(relx=0.01, rely=0.44, relwidth=0.98, relheight=0.54)
 
         # --- DENTRO DO filtros_frame ---
+        self.quadro_deposito.place(relx=0.02, rely=0.05, relwidth=0.25, relheight=0.60)
+        self.quadro_ruas.place(relx=0.34, rely=0.05, relwidth=0.25, relheight=0.60)
+        self.quadro_sugestao.place(relx=0.66, rely=0.05, relwidth=0.30, relheight=0.60)
 
-        # Quadro Depósito (Ocupando 40%)
-        self.quadro_deposito.place(relx=0.02, rely=0.05, relwidth=0.40, relheight=0.80)
-        # Ajuste interno (Labels um pouco menores, Entries maiores)
-        self.text_dep_inicio.place(relx=0.05, rely=0.10, relwidth=0.30, relheight=0.35)
-        self.ent_dep_inicio.place(relx=0.40, rely=0.10, relwidth=0.55, relheight=0.35)
-        self.text_dep_fim.place(relx=0.05, rely=0.55, relwidth=0.30, relheight=0.35)
-        self.ent_dep_fim.place(relx=0.40, rely=0.55, relwidth=0.55, relheight=0.35)
+        # Quadro Sugestão
+        self.text_30.place(relx=0.02, rely=0.10, relwidth=0.98, relheight=0.40)
+        self.text_90.place(relx=0.02, rely=0.50, relwidth=0.98, relheight=0.40)
 
-        # Quadro Ruas (Começa em 0.44 -> 0.40 do anterior + 0.02 de gap + 0.02 margem)
-        self.quadro_ruas.place(relx=0.44, rely=0.05, relwidth=0.40, relheight=0.80)
-        # Ajuste interno igual ao anterior
-        self.text_rua_inicio.place(relx=0.05, rely=0.10, relwidth=0.30, relheight=0.35)
-        self.ent_rua_inicio.place(relx=0.40, rely=0.10, relwidth=0.55, relheight=0.35)
-        self.text_rua_fim.place(relx=0.05, rely=0.55, relwidth=0.30, relheight=0.35)
-        self.ent_rua_fim.place(relx=0.40, rely=0.55, relwidth=0.55, relheight=0.35)
+        # Quadro Depósito
+        self.ent_dep_inicio.place(relx=0.60, rely=0.10, relwidth=0.30, relheight=0.30)
+        self.ent_dep_fim.place(relx=0.60, rely=0.55, relwidth=0.30, relheight=0.30)
+        self.text_dep_inicio.place(relx=0.15, rely=0.10, relwidth=0.40, relheight=0.35)
+        self.text_dep_fim.place(relx=0.15, rely=0.55, relwidth=0.40, relheight=0.35)
 
-        # Botões (Mantidos na direita, mas levemente alargados para 0.14)
-        self.bt_iniciar.place(relx=0.85, rely=0.05, relwidth=0.14, relheight=0.28)
-        self.bt_limpar.place(relx=0.85, rely=0.36, relwidth=0.14, relheight=0.28)
-        self.bt_documentar.place(relx=0.85, rely=0.67, relwidth=0.14, relheight=0.28)
+        # Quadro Ruas
+        self.ent_rua_inicio.place(relx=0.60, rely=0.10, relwidth=0.30, relheight=0.30)
+        self.ent_rua_fim.place(relx=0.60, rely=0.55, relwidth=0.30, relheight=0.30)
+        self.text_rua_inicio.place(relx=0.15, rely=0.10, relwidth=0.40, relheight=0.35)
+        self.text_rua_fim.place(relx=0.15, rely=0.55, relwidth=0.40, relheight=0.35)
 
-        self.bt_iniciar.place(relx=0.86, rely=0.02, relwidth=0.13, relheight=0.28)
-        self.bt_limpar.place(relx=0.86, rely=0.36, relwidth=0.13, relheight=0.28)
-        self.bt_documentar.place(relx=0.86, rely=0.67, relwidth=0.13, relheight=0.28)
-
+        # Botões
+        self.bt_iniciar.place(relx=0.49, rely=0.75, relwidth=0.15, relheight=0.20)
+        self.bt_limpar.place(relx=0.65, rely=0.75, relwidth=0.15, relheight=0.20)
+        self.bt_documentar.place(relx=0.81, rely=0.75, relwidth=0.15, relheight=0.20)
 
 if __name__ == '__main__':
     Calibrador_v1()

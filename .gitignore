@@ -20,3 +20,4 @@ base_dados/*.txt
 # Ignorar o arquivo de saída gerado pelo Pandas
 *.xls*
 *.txt
+*.ipynb
