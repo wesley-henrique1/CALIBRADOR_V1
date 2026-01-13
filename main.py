@@ -9,7 +9,7 @@ class Auxiliar:
     def atualizar_log(self, indice):
     
         self.dados_arquivos = self.logica.carregamento(indice= indice)
-        conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^41} | {'DATA':^10} | {'HORA':^8}\n"
+        conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^40} | {'DATA':^10} | {'HORA':^8}\n"
         conteudo_completo += f"{'-' * 71}\n"        
         if isinstance(self.dados_arquivos, bool) or self.dados_arquivos is None:
             self.retorno_label.config(text="Erro: Arquivos não carregados.", fg="red")
@@ -20,17 +20,17 @@ class Auxiliar:
 
         for item in self.dados_arquivos:
             nome_arq = item['ARQUIVO']
-            if len(nome_arq) > 41:
-                nome_arq = nome_arq[:39] + "..."
+            if len(nome_arq) > 40:
+                nome_arq = nome_arq[:35] + "..."
                 
-            linha = f"{item['CONTADOR']:02d}  | {nome_arq:<41} | {item['DATA']:<10} | {item['HORAS']:<8}\n"
+            linha = f"{item['CONTADOR']:02d}  | {nome_arq:<40} | {item['DATA']:<10} | {item['HORAS']:<8}\n"
             conteudo_completo += linha
 
         self.retorno_label.config(
             text=conteudo_completo, 
             justify="left", 
             anchor="nw",
-            font=("Consolas", 10) 
+            font=("Consolas", 11) 
         )
     def BT_iniciar(self):
         root_janela = self.retorno_label.winfo_toplevel()
@@ -302,6 +302,7 @@ class Calibrador_v1(Auxiliar):
             ,highlightbackground= self.text_color
             ,highlightthickness= 3
             ,command= self.BT_iniciar
+            ,
         )
         self.bt_limpar = tk.Button(
             self.filtros_frame
@@ -325,6 +326,9 @@ class Calibrador_v1(Auxiliar):
             ,highlightthickness= 3
             ,command= self.abrir_documentacao
         )      
+        self.bt_iniciar.bind("<Return>", lambda e: self.bt_iniciar.invoke())
+        self.bt_limpar.bind("<Return>", lambda e: self.bt_limpar.invoke())
+        self.bt_documentar.bind("<Return>", lambda e: self.bt_documentar.invoke())
     def localizador(self):
         # Painel de Filtros (Topo)
         self.filtros_frame.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.42)
