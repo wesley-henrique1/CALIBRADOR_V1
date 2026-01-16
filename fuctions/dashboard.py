@@ -1,86 +1,60 @@
 from path_dados import FILE_RETORNO
-import matplotlib
-matplotlib.use('TkAgg') # Força o uso da interface do Tkinter
-import matplotlib.pyplot as plt
-from logica import Auxiliares
+import plotly.express as px
+import streamlit as tk
 import pandas as pd
-aux = Auxiliares()
-
 
 
 class Dashboard:
     def __init__(self):
-        self.df_retorno = None
-        self.sucesso = False  # Flag de controle
-        self.col = ['RUA', 'CRIT_CAP', 'STATUS_PROD', 'SIT_REPOS','ALERTA_50','STATUS_FINAL']
-        try:
-            self.df_retorno = pd.read_excel(FILE_RETORNO, usecols= self.col)
-            self.sucesso = True # Se chegar aqui, deu certo
-        except Exception as e:
-            # Chama sua classe de erro (estática ou instanciada conforme conversamos)
-            aux.validar_erro(e, "CARREGAMENTO_DASHBOARD")
-            self.sucesso = False
+        self.dados_retorno = pd.read_excel(FILE_RETORNO)
+        
+        self.fundo = "#E3F2FF"
+        self.valores = "#AA3032"
+        self.barras = "#115086"
 
-    def pizza(self):
-        """
-        Saúde do Estoque - Gráfico de Pizza
-        """
-        try:
-            # 1. Contagem dos valores
-            divergencia = len(self.df_retorno[self.df_retorno['STATUS_FINAL'] == "DIV"])
-            normal = len(self.df_retorno[self.df_retorno['STATUS_FINAL'] == "NORMAL"])
-            print(f"Divergências: {divergencia} | Normais: {normal}")
-            # 2. Preparação dos dados para o Matplotlib
-            labels = ['Divergente', 'Normal']
-            valores = [divergencia, normal]
-            cores = ['#ff4d4d', '#2eb82e'] # Vermelho e Verde
+        self.dados()
 
-            # 3. Criação do gráfico
-            plt.figure(figsize=(6, 4))
-            plt.pie(valores, labels=labels, autopct='%1.1f%%', startangle=140, colors=cores)
-            plt.title("Saúde do Estoque")
-            
-            plt.show()
-        except Exception as e:
-            from logica import Auxiliares
-            aux = Auxiliares()
-            aux.validar_erro(e, "GERAÇÃO_GRAFICO_PIZZA")    
+    def dados(self):
+        # Saúde do Estoque
+        life_ST = self.dados_retorno.groupby("STATUS_FINAL").size().reset_index(name='CONTAGEM') 
 
-    def list_mutiplico(self):
-        """
-        COMPARATIVO
-        """
-        pass
-    def area_1(self):
-        """
-        Mapeamento de Falhas de Capacidade e Giro
-        """
-        pass
-    
-    def coluna_1(self):
-        """
-        Ruptura de Fluxo: Itens que Exigem Mais de Uma Reposição Diária
-        """
-        pass
-    def coluna_2(self):
-        """
-        Itens Críticos por Rua (Reposição < Giro_dia)
-        """
-        pass
-   
-    def coluna_3(self):
-        """
-        Produtos com Consumo Diário > 50% da Capacidade
-        """
-        pass
-    def area_2(self):
-        """
-        Mapeamento de produtos dividos
-        """
-        pass
+        # Mapeamento de Falhas de Capacidade e Giro
+        map_div = self.dados_retorno.groupby("RUA").agg(
+            DIVERGENCIA = ("STATUS_FINAL", lambda x: (x == "DIV").sum())
+        ).reset_index()
+        map_div = map_div[map_div["DIVERGENCIA"] > 0]
 
+        # Ruptura de Fluxo: Itens que Exigem Mais de Uma Reposição Diária
+        crit_cap = self.dados_retorno.groupby("RUA").agg(
+            qtde = ("CRIT_CAP", lambda x: (x == "AJUSTAR").sum())
+        ).reset_index()
+        crit_cap = crit_cap[crit_cap["qtde"] > 0]
 
+        #Itens Críticos por Rua (Reposição < Giro_dia)
+        sit_ros = self.dados_retorno.groupby("RUA").agg(
+            qtde = ("SIT_REPOS", lambda x: (x == "AJUSTAR").sum())
+        ).reset_index()
+        sit_ros = sit_ros[sit_ros["qtde"] > 0]
 
-if __name__ == "__main__":
-    dash = Dashboard()
-    dash.pizza()
+        # Produtos com Consumo Diário > 50% da Capacidade
+        alerta_50 = self.dados_retorno.groupby("RUA").agg(
+            qtde = ("ALERTA_50", lambda x: (x == "AJUSTAR").sum())
+        ).reset_index()
+        alerta_50 = alerta_50[alerta_50["qtde"] > 0]
+
+        # Mapeamento de produtos dividos
+        divididos = self.dados_retorno.groupby("RUA").agg(
+            qtde = ("STATUS_PROD", lambda x: x.isin(["DIV", "VAL"]).sum())
+        ).reset_index()
+        divididos = divididos[divididos["qtde"] > 0]
+
+        resumo_geral = pd.DataFrame({
+            "INDICADOR": ["Capacidade Critica", "Pressão de Preposição", "Ponto de Reposição Critico"],
+            "VALOR": [
+                (self.dados_retorno["CRIT_CAP"] == "AJUSTAR").sum(),
+                (self.dados_retorno["ALERTA_50"] == "AJUSTAR").sum(),
+                (self.dados_retorno["SIT_REPOS"] == "AJUSTAR").sum(),
+            ]
+        })
+    def graficos(self):
+        pass
