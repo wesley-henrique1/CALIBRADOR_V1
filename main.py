@@ -3,11 +3,32 @@ from fuctions.logica import Logicas
 from tkinter import messagebox 
 import datetime as dt
 import tkinter as tk
+import threading
 
 
 class Auxiliar:
+    def finalizar_ui(self, sucesso):
+        root_janela = self.retorno_label.winfo_toplevel()
+        root_janela.config(cursor="")
+        self.bt_iniciar.config(state="normal")
+        self.bt_limpar.config(state="normal")
+
+        if sucesso:
+            messagebox.showinfo("CALIBRADOR", "Processo finalizado com sucesso!")
+        else:
+            messagebox.showerror("Erro", "Ocorreu um erro. Verifique o arquivo log_erros.txt")
+    def processamento(self, list_dep, list_ruas):
+        try:
+            root_janela = self.retorno_label.winfo_toplevel()
+            root_janela.after(0, lambda: self.atualizar_log(list_dep))
+
+            sucesso = self.logica.pipeline(filtro_rua=list_ruas, indice=list_dep)
+            
+            root_janela.after(0, lambda: self.finalizar_ui(sucesso))
+            
+        except Exception as e:
+            self.logica.validar_erro(e, "THREAD_PROCESSAMENTO")
     def atualizar_log(self, indice):
-    
         self.dados_arquivos = self.logica.carregamento(indice= indice)
         conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^40} | {'DATA':^10} | {'HORA':^8}\n"
         conteudo_completo += f"{'-' * 71}\n"        
@@ -32,35 +53,32 @@ class Auxiliar:
             anchor="nw",
             font=("Consolas", 11) 
         )
+    
     def BT_iniciar(self):
         root_janela = self.retorno_label.winfo_toplevel()
-        self.retorno_label.config(text=" PROCESSANDO DADOS... POR FAVOR, AGUARDE.", fg="#FF640A")
-        root_janela.config(cursor="watch")
-        root_janela.update_idletasks()
         try:
             inicio_rua = int(self.ent_rua_inicio.get())
             fim_rua = int(self.ent_rua_fim.get())
-            
             list_ruas = list(range(inicio_rua, fim_rua + 1))
-        except ValueError:
-            list_ruas = []
 
-        try:
             inicio_dep = int(self.ent_dep_inicio.get())
             fim_dep = int(self.ent_dep_fim.get())
-
             list_dep = list(range(inicio_dep-1, fim_dep))
+            
+            self.retorno_label.config(text=" PROCESSANDO DADOS... POR FAVOR, AGUARDE.", fg="#FF640A")
+            root_janela.config(cursor="watch")
+            self.bt_iniciar.config(state="disabled")
+            self.bt_limpar.config(state="disabled")
+
+            threading.Thread(
+                target=self.processamento, 
+                args=(list_dep, list_ruas), 
+                daemon=True
+            ).start()
         except ValueError:
-            list_dep = []
-
-
-        self.atualizar_log(list_dep)
-        sucesso = self.logica.pipeline(filtro_rua= list_ruas, indice= list_dep)
-        if sucesso:
-            messagebox.showinfo("CALIBRADOR", "Processo finalizado com sucesso!")
-        else:
-            messagebox.showerror("Erro", "Ocorreu um erro. Verifique o arquivo log_erros.txt")
-        root_janela.config(cursor="")
+            messagebox.showwarning("Atenção", "Por favor, insira valores numéricos válidos.")
+            root_janela.config(cursor="")
+            return
     def BT_limpar(self):
         self.ent_dep_inicio.delete(0, tk.END)
         self.ent_dep_fim.delete(0, tk.END)
@@ -135,7 +153,7 @@ class Calibrador_v1(Auxiliar):
         self.data_30 = (self.data_atual - dt.timedelta(days=30))
 
         root = tk.Tk()
-        root.title("CALIBRADOR_V1")
+        root.title("CALIBRADOR_V2")
         root.geometry("600x400")
         root.iconbitmap(Path_dados.icone)
         root.configure(bg=  self.backgraund)
