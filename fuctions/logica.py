@@ -91,6 +91,7 @@ class Logicas(Auxiliares):
         ]
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
+        self.list_div = ['3-MEDIO (0,80)', '6-PRATELEIRA','5-TERCO (0,46)','4-TERCO (0,56)','7-MEIO PALETE']
 
         self.pipeline(filtro_rua= [1,3], indice= [1,1])
 
@@ -333,7 +334,7 @@ class Logicas(Auxiliares):
                 self.validar_erro(e, "T-SUP")
             try:
                 df_calibrado['SIT_REPOS'] = np.where(
-                    df_calibrado['PONTOREPOSICAO'] < df_calibrado['GIRO_DIA']
+                    df_calibrado['GIRO_DIA'] > df_calibrado['PONTOREPOSICAO']
                     ,"AJUSTAR"
                     ,"NORMAL"
                 )
@@ -344,21 +345,12 @@ class Logicas(Auxiliares):
                 )
                 df_calibrado['ALERTA_50'] = np.where(
                     df_calibrado['CRIT_CAP'] == "NORMAL"
-                    ,np.where((
-                        df_calibrado['GIRO_DIA'].astype(float) / df_calibrado['CAPACIDADE'].astype(float)) > 0.5
+                    ,np.where(
+                        (df_calibrado['GIRO_DIA'].astype(float) / df_calibrado['CAPACIDADE'].astype(float)) > 0.5
                             ,"AJUSTAR"
                             ,"NORMAL"
                         )
                     ,"NORMAL" 
-                )
-                df_calibrado['STATUS_PROD'] = np.where(
-                    (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
-                    ,"INT",
-                    np.where(
-                        df_calibrado['FREQ_PROD'] > 3,
-                        "DIV"
-                        ,"VAL"
-                    )
                 )
                 df_calibrado['MED_ACESSO'] = np.where(
                     df_calibrado['ACESSO'] > df_calibrado['MED_RUA']
@@ -372,6 +364,20 @@ class Logicas(Auxiliares):
                         ((df_calibrado['MED_ACESSO'] == "ABAIXO") & (df_calibrado['PR_MEIO'] > df_calibrado['PREDIO']))
                         ,"DOWN"
                         ,"NORMAL"
+                    )
+                )
+                condicao_int_puro = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
+                condicao_virou_div = (
+                    (df_calibrado['PK_END'].isin(self.list_div)) 
+                    | ((df_calibrado['FREQ_PROD'] > 2) & (df_calibrado['PK_END'].isin(self.list_int)))
+                )
+                df_calibrado['STATUS_PROD'] = np.where(
+                    condicao_int_puro
+                    ,"INT",
+                    np.where(
+                        condicao_virou_div,
+                        "DIV"
+                        ,"VAL"
                     )
                 )
                 df_calibrado['STATUS_FINAL'] = np.where((
