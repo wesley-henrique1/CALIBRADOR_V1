@@ -10,6 +10,7 @@ class Auxiliar:
     def finalizar_ui(self, sucesso):
         root_janela = self.retorno_label.winfo_toplevel()
         root_janela.config(cursor="")
+
         self.bt_iniciar.config(state="normal")
         self.bt_limpar.config(state="normal")
 
@@ -23,19 +24,18 @@ class Auxiliar:
             root_janela.after(0, lambda: self.atualizar_log(list_dep))
 
             sucesso = self.logica.pipeline(filtro_rua=list_ruas, indice=list_dep)
-            
             root_janela.after(0, lambda: self.finalizar_ui(sucesso))
-            
         except Exception as e:
             self.logica.validar_erro(e, "THREAD_PROCESSAMENTO")
     def atualizar_log(self, indice):
         self.dados_arquivos = self.logica.carregamento(indice= indice)
         conteudo_completo = f"{'ID':^3} | {'ARQUIVO':^40} | {'DATA':^10} | {'HORA':^8}\n"
-        conteudo_completo += f"{'-' * 71}\n"        
+        conteudo_completo += f"{'-' * 71}\n" 
+
         if isinstance(self.dados_arquivos, bool) or self.dados_arquivos is None:
             self.retorno_label.config(text="Erro: Arquivos não carregados.", fg="red")
             return
-    
+        
         if self.dados_arquivos is None:
             return 
 
@@ -53,7 +53,6 @@ class Auxiliar:
             anchor="nw",
             font=("Consolas", 11) 
         )
-    
     def BT_iniciar(self):
         root_janela = self.retorno_label.winfo_toplevel()
         try:
@@ -65,7 +64,7 @@ class Auxiliar:
             fim_dep = int(self.ent_dep_fim.get())
             list_dep = list(range(inicio_dep-1, fim_dep))
             
-            self.retorno_label.config(text=" PROCESSANDO DADOS... POR FAVOR, AGUARDE.", fg="#993B05DF")
+            self.retorno_label.config(text=" PROCESSANDO DADOS... POR FAVOR, AGUARDE.", fg="#EE7600")
             root_janela.config(cursor="watch")
             self.bt_iniciar.config(state="disabled")
             self.bt_limpar.config(state="disabled")
@@ -90,7 +89,7 @@ class Auxiliar:
             ,justify= "center"
             ,anchor= "center"
             ,font=("Consolas", 16, "bold")
-)
+        )
         self.ent_dep_inicio.focus_set()
     def abrir_documentacao(self):
         janela_info = tk.Toplevel()
@@ -123,7 +122,7 @@ class Auxiliar:
             "|CRIT_CAP: Alerta se Giro Dia >= Capacidade Física.\n"
             "|ALERTA_50: Alerta se Giro > 50% da Capacidade.\n"
             "|ALERTA_MOV: Identifica erro de posicionamento logístico\n"
-            "|(Lento na ponta OU Rápido no fundo).\n\n"
+            "(Lento na ponta OU Rápido no fundo).\n\n"
 
             f"|{f'{icon_box} STATUS & CLASSIFICAÇÃO':<50}\n"
             f"|{'-' * 50}\n"
@@ -134,12 +133,11 @@ class Auxiliar:
             f"|{f'{icon_data} ORIGEM DOS DADOS (COLUNAS NECESSÁRIAS)':<50}\n"
             f"|{'-' * 50}\n"
             "|ROT. 8596 (Endereço): CODPROD, RUA, PREDIO, APTO, CAPACIDADE,\n"
-            "|PONTOREPOSICAO, QTTOTPAL, QTUNITCX, PK_END\n"
+            "PONTOREPOSICAO, QTTOTPAL, QTUNITCX, PK_END\n"
             "|ROT. 8560 (Separação): CODPROD, QTOS, QT\n"
             "|ROT. 286  (Estoque): Estoque, Custo, Qt.Bloq, Avaria\n"
             "|ROT. 8628 (WMS): NIVEL, NIVEL_1, CODROTINA, Tipo O.S."
         )
-
         txt_info = tk.Text(
             janela_info
             ,font=("Consolas", 12)
@@ -157,8 +155,8 @@ class Auxiliar:
 class Calibrador_v1(Auxiliar):
     def __init__(self):
         self.logica = Logicas()
-        self.backgraund = "#2F4F4F"
 
+        self.backgraund = "#2F4F4F"
         self.primeira_cor = "#000000"
         self.segunda_cor = "#F0FFFF"
 
@@ -191,7 +189,7 @@ class Calibrador_v1(Auxiliar):
             ,borderwidth=3
             ,highlightthickness=0
         )
-
+        
         self.quadro_deposito = tk.LabelFrame(
             self.filtros_frame
             ,text=" DEPOSITO "
@@ -277,20 +275,6 @@ class Calibrador_v1(Auxiliar):
             ,anchor= "center"
         )
 
-        self.retorno_label = tk.Label(
-            root
-            ,text="Aguardando inicialização..."
-            ,font=("Consolas", 11, "bold")
-            ,borderwidth=0
-            ,highlightthickness=3
-            ,highlightbackground=self.primeira_cor
-            ,fg=self.segunda_cor
-            ,bg=self.segunda_cor
-            ,justify="center"
-            ,anchor="center"
-            ,padx=10
-            ,pady=10
-        )
         
         self.quadro_sugestao = tk.LabelFrame(
             self.filtros_frame
@@ -322,6 +306,20 @@ class Calibrador_v1(Auxiliar):
             ,anchor="center"
             ,borderwidth=2
             ,relief="groove"
+        )
+        self.retorno_label = tk.Label(
+            root
+            ,text="Aguardando inicialização..."
+            ,font=("Consolas", 11, "bold")
+            ,borderwidth=0
+            ,highlightthickness=3
+            ,highlightbackground=self.primeira_cor
+            ,fg=self.segunda_cor
+            ,bg=self.segunda_cor
+            ,justify="center"
+            ,anchor="center"
+            ,padx=10
+            ,pady=10
         )
     def botoes_layout(self):
         self.bt_iniciar = tk.Button(
@@ -358,6 +356,7 @@ class Calibrador_v1(Auxiliar):
             ,highlightthickness= 3
             ,command= self.abrir_documentacao
         )      
+        
         self.bt_iniciar.bind("<Return>", lambda e: self.bt_iniciar.invoke())
         self.bt_limpar.bind("<Return>", lambda e: self.bt_limpar.invoke())
         self.bt_documentar.bind("<Return>", lambda e: self.bt_documentar.invoke())

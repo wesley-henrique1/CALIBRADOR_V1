@@ -1,15 +1,11 @@
-import os
-import sys
-diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, diretorio_atual)
-
 from path_dados import *
+
 import datetime as data
 import pandas as pd
 import numpy as np
 import warnings
+import os
 warnings.simplefilter(action='ignore', category=UserWarning)
-
 
 class Auxiliares:
     def validar_erro(self, e, etapa):
@@ -70,7 +66,7 @@ class Auxiliares:
         return df_temp   
 class Logicas(Auxiliares):
     def __init__(self):
-        os.system("title CALIBRADOR_V1")
+        os.system("title CALIBRADOR_V3")
         self.listagem_path = [
             Path_dados.cadastro_8596    # CADASTRO DOS PRODUTOS
             ,Path_dados.acesso_8560     # ESTOQUE E O CUSTO DOS PRODUTOS
@@ -92,8 +88,6 @@ class Logicas(Auxiliares):
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
         self.list_div = ['3-MEDIO (0,80)', '6-PRATELEIRA','5-TERCO (0,46)','4-TERCO (0,56)','7-MEIO PALETE']
-
-        self.pipeline(filtro_rua= [1,3], indice= [1,1])
 
     def carregamento(self, indice):
         lista_de_logs = []
@@ -239,14 +233,15 @@ class Logicas(Auxiliares):
             df_produtos['OBS2'] = df_produtos['OBS2'].fillna("Ativos")
 
             df_estoque = df_estoque.fillna(0)
-            rename = {
-                "Código" : "CODPROD"
-                ,"Qtde Pedida" : "PEDIDO_COMP"
-                ,"Bloqueado(Qt.Bloq.-Qt.Avaria)" : "BLOQUEADO"
-                ,"Qt.Avaria" : "AVARIA"
-                ,"Custo ult. ent." : "CUSTO_ULT_ENTRADA"
-            }
-            df_estoque = df_estoque.rename(columns=rename)
+            df_estoque = df_estoque.rename(
+                columns={
+                    "Código" : "CODPROD"
+                    ,"Qtde Pedida" : "PEDIDO_COMP"
+                    ,"Bloqueado(Qt.Bloq.-Qt.Avaria)" : "BLOQUEADO"
+                    ,"Qt.Avaria" : "AVARIA"
+                    ,"Custo ult. ent." : "CUSTO_ULT_ENTRADA"
+                }
+            )
 
             df_acesso = df_acesso.groupby('CODPROD').agg(
             ACESSO = ("QTOS", "sum")
@@ -324,12 +319,17 @@ class Logicas(Auxiliares):
                 ).reset_index()
                 med_acesso['MED_RUA'] = round(med_acesso['TT_acesso'].fillna(0) / med_acesso['QT_prod'].fillna(0),0).astype(int)
                 med_acesso['PR_MEIO'] = round(med_acesso['P_MAX'].fillna(0) * 0.3,0).astype(int)
-                df_calibrado = df_calibrado.merge(med_acesso, on= 'RUA', how='left').fillna(0).drop(columns=['TT_acesso', 'QT_prod'])
+                df_calibrado = df_calibrado.merge(med_acesso, on= 'RUA', how='left').drop(columns=['TT_acesso', 'QT_prod'])
                 
                 df_calibrado['CUSTO'] = df_calibrado['CUSTO_ULT_ENTRADA'].round(2)
                 df_calibrado['SUG_%'] = round(df_calibrado['SUGESTAO'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
                 df_calibrado['ATUAL_%'] = round(df_calibrado['CAPACIDADE'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
                 df_calibrado['FREQ_PROD'] = concat.map(concat.value_counts())
+                condicao_int_puro = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
+                condicao_virou_div = (
+                    (df_calibrado['PK_END'].isin(self.list_div)) 
+                    | ((df_calibrado['FREQ_PROD'] > 2) & (df_calibrado['PK_END'].isin(self.list_int)))
+                )
             except Exception as e:
                 self.validar_erro(e, "T-SUP")
             try:
@@ -366,11 +366,6 @@ class Logicas(Auxiliares):
                         ,"NORMAL"
                     )
                 )
-                condicao_int_puro = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
-                condicao_virou_div = (
-                    (df_calibrado['PK_END'].isin(self.list_div)) 
-                    | ((df_calibrado['FREQ_PROD'] > 2) & (df_calibrado['PK_END'].isin(self.list_int)))
-                )
                 df_calibrado['STATUS_PROD'] = np.where(
                     condicao_int_puro
                     ,"INT",
@@ -399,13 +394,22 @@ class Logicas(Auxiliares):
                 (df_calibrado['EST_CX'].replace(0, np.nan) / df_calibrado['QTTOTPAL'].replace(0, np.nan))
                 ,1
             ).fillna(0)
-            
-            col_analises = ['SUG_%', 'ATUAL_%', 'SIT_REPOS','ALERTA_50','CRIT_CAP',"MED_ACESSO",'ALERTA_MOV','FREQ_PROD','STATUS_PROD','STATUS_FINAL']
         except Exception as e:
             self.validar_erro(e, "Transform")
             return False
         try: # CARGA
-            df_calibrado = df_calibrado.sort_values(by= ['RUA', 'PREDIO'], ascending= True)
+            col_analises = [
+                'SUG_%'
+                ,'ATUAL_%'
+                ,'SIT_REPOS'
+                ,'ALERTA_50'
+                ,'CRIT_CAP'
+                ,"MED_ACESSO"
+                ,'ALERTA_MOV'
+                ,'FREQ_PROD'
+                ,'STATUS_PROD'
+                ,'STATUS_FINAL'
+            ]
             col_ordenar = [
                 'CODPROD'
                 ,'DESCRICAO'
@@ -435,6 +439,7 @@ class Logicas(Auxiliares):
                 ,'CLASSE'
             ]
             df_calibrado = df_calibrado[col_ordenar + col_analises]
+            df_calibrado = df_calibrado.sort_values(by= ['RUA', 'PREDIO'], ascending= True)
             df_calibrado.to_excel(Path_dados.retorno, index= False, sheet_name= 'Calibração')
             return True                
         except Exception as e:
