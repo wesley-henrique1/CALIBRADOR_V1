@@ -135,7 +135,7 @@ class Calibrador_v1(Auxiliar):
         self.data_30 = (self.data_atual - dt.timedelta(days=30))
 
         root = tk.Tk()
-        root.title("CALIBRADOR_V1")
+        root.title("CALIBRADOR_V3")
         root.geometry("600x400")
         root.iconbitmap(Path_dados.icone)
         root.configure(bg=  self.backgraund)
