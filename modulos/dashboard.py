@@ -1,4 +1,4 @@
-from path_dados import FILE_RETORNO
+from modulos._settings import FILE_RETORNO
 import plotly.express as px
 import streamlit as tk
 import pandas as pd

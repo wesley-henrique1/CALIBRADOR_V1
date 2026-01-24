@@ -10,13 +10,12 @@ venv/
 .vscode/
 build/
 dist/
-CALIBRADOR_V1.spec
+DASH_CALIBRAR.pbix
 
 # Ignorar apenas os arquivos de DADOS dentro da pasta, mas manter a pasta e o script de caminhos
 base_dados/*.xlsx
 base_dados/*.xls
 base_dados/*.txt
-
 # Ignorar o arquivo de saída gerado pelo Pandas
 *.xls*
 *.txt

@@ -1,5 +1,5 @@
-from fuctions.path_dados import Path_dados
-from fuctions.logica import Logicas
+from modulos._settings import Path_dados
+from modulos.etl_engine import Logicas
 from tkinter import messagebox 
 import datetime as dt
 import tkinter as tk

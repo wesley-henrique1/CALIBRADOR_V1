@@ -1,4 +1,4 @@
-from path_dados import *
+from modulos._settings import *
 
 import datetime as data
 import pandas as pd

@@ -11,10 +11,11 @@ else:
 
 PASTA_DADOS = os.path.join(BASE_DIR, "base_dados")
 FILE_RETORNO = os.path.join(BASE_DIR, 'RETORNO.xlsx')
-PASTA_STYLE = os.path.join(INTERNAL_DIR, "style")
+PASTA_STYLE = os.path.join(INTERNAL_DIR, "Assets")
 
 class Path_dados:
     icone = os.path.join(PASTA_STYLE, 'flesh_perfil.ico')
+    flesh = os.path.join(PASTA_STYLE, 'flesh_completo.png')
     retorno = FILE_RETORNO
                          
     cadastro_8596 = os.path.join(PASTA_DADOS, 'DADOS_PRODUTOS_8596.xlsx')

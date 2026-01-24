@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('style', 'style'), ('base_dados', 'base_dados'), ('fuctions', 'fuctions')],
+    datas=[('assets', 'assets'), ('base_dados', 'base_dados'), ('modulos', 'modulos')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -21,7 +21,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='CALIBRADOR_V2',
+    name='CALIBRADOR',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['style\\flesh_perfil.ico'],
+    icon=['assets\\flesh_perfil.ico'],
 )
 coll = COLLECT(
     exe,
@@ -41,5 +41,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='CALIBRADOR_V2',
+    name='CALIBRADOR',
 )
