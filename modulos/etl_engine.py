@@ -87,7 +87,8 @@ class Logicas(Auxiliares):
         ]
         self.LARGURA = 78
         self.list_int = ['2-INTEIRO(1,90)', '1-INTEIRO (2,55)']
-        self.list_div = ['3-MEDIO (0,80)', '6-PRATELEIRA','5-TERCO (0,46)','4-TERCO (0,56)','7-MEIO PALETE']
+        self.list_div = ['6-PRATELEIRA','5-TERCO (0,46)','4-TERCO (0,56)','7-MEIO PALETE']
+        self.list_meio = ['3-MEDIO (0,80)']
 
     def carregamento(self, indice):
         lista_de_logs = []
@@ -325,11 +326,8 @@ class Logicas(Auxiliares):
                 df_calibrado['SUG_%'] = round(df_calibrado['SUGESTAO'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
                 df_calibrado['ATUAL_%'] = round(df_calibrado['CAPACIDADE'] / df_calibrado['QTTOTPAL'], 2).fillna(0)
                 df_calibrado['FREQ_PROD'] = concat.map(concat.value_counts())
-                condicao_int_puro = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
-                condicao_virou_div = (
-                    (df_calibrado['PK_END'].isin(self.list_div)) 
-                    | ((df_calibrado['FREQ_PROD'] > 2) & (df_calibrado['PK_END'].isin(self.list_int)))
-                )
+                condicao_inteiro = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_int))
+                condicao_medio = (df_calibrado['FREQ_PROD'] <= 2) & (df_calibrado['PK_END'].isin(self.list_meio))
             except Exception as e:
                 self.validar_erro(e, "T-SUP")
             try:
@@ -367,14 +365,14 @@ class Logicas(Auxiliares):
                     )
                 )
                 df_calibrado['STATUS_PROD'] = np.where(
-                    condicao_int_puro
-                    ,"INT",
-                    np.where(
-                        condicao_virou_div,
-                        "DIV"
-                        ,"VAL"
+                        condicao_inteiro
+                        ,"INT",
+                        np.where(
+                            condicao_medio,
+                            "MEIO"
+                            ,"DIV"
+                        )
                     )
-                )
                 df_calibrado['STATUS_FINAL'] = np.where((
                         (df_calibrado['CRIT_CAP'] == "NORMAL")
                         & (df_calibrado['SIT_REPOS'] == "NORMAL")
